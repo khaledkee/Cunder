@@ -1,5 +1,3 @@
-#include <torch/all.h>
-#include <torch/script.h>
 #include "c_libtorch.h"
 
 namespace dtype
@@ -19,42 +17,38 @@ namespace dtype
     {
         switch (dtype)
         {
-            case Cunder_kInvalid:
-                throw std::invalid_argument("Unknown dtype");
+        case Cunder_kInvalid:
+            throw std::invalid_argument("Unknown dtype");
 
-            case Cunder_kUint8:
-                return torch::kUInt8;
+        case Cunder_kUint8:
+            return torch::kUInt8;
 
-            case Cunder_kInt8:
-                return torch::kInt8;
+        case Cunder_kInt8:
+            return torch::kInt8;
 
-            case Cunder_kInt16:
-                return torch::kInt16;
+        case Cunder_kInt16:
+            return torch::kInt16;
 
-            case Cunder_kInt32:
-                return torch::kInt32;
+        case Cunder_kInt32:
+            return torch::kInt32;
 
-            case Cunder_kInt64:
-                return torch::kInt64;
+        case Cunder_kInt64:
+            return torch::kInt64;
 
-            case Cunder_kFloat16:
-                return torch::kFloat16;
+        case Cunder_kFloat16:
+            return torch::kFloat16;
 
-            case Cunder_kFloat32:
-                return torch::kFloat32;
+        case Cunder_kFloat32:
+            return torch::kFloat32;
 
-            case Cunder_kFloat64:
-                return torch::kFloat64;
+        case Cunder_kFloat64:
+            return torch::kFloat64;
         }
     }
 } // namespace dtype
 
 extern "C"
 {
-    struct TensorData
-    {
-        at::Tensor tensor;
-    };
 
     void cunder_torch_version(int *major, int *minor, int *patch)
     {
@@ -91,6 +85,7 @@ extern "C"
         return 0; // success
     }
 
+    // torch::ones
     cunder_at_Tensor *cunder_torch_ones(int ndim, int *shape, Cunder_DType dtype)
     {
         if (shape == NULL)
@@ -165,6 +160,7 @@ extern "C"
         return cunder_torch_ones(4, shape, dtype);
     }
 
+    // torch::zeros
     cunder_at_Tensor *cunder_torch_zeros(int ndim, int *shape, Cunder_DType dtype)
     {
         if (shape == NULL)
@@ -253,6 +249,26 @@ extern "C"
 
         TensorData *data = new TensorData();
         data->tensor = torch::eye(n, dtype::get_libtorch_dtype(dtype));
+
+        tensor->data = data;
+        tensor->ndim = n;
+        return tensor;
+    }
+
+    // torch::range
+    cunder_at_Tensor *cunder_torch_range(int start, int end, int step, Cunder_DType dtype)
+    {
+        if (!dtype::is_valid_dtype(dtype))
+        {
+            return NULL;
+        }
+
+        cunder_at_Tensor *tensor = reinterpret_cast<cunder_at_Tensor *>(malloc(sizeof(cunder_at_Tensor)));
+        tensor->dtype = dtype;
+        tensor->ndim = 1;
+
+        TensorData *data = new TensorData();
+        data->tensor = torch::range(start, end, step, dtype::get_libtorch_dtype(dtype));
 
         tensor->data = data;
 
