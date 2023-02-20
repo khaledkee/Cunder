@@ -3,89 +3,88 @@
 
 void test_tutorial()
 {
-  TEST_CHECK_(1 == 1, "bora");
+	TEST_CHECK_(1 == 1, "bora");
 }
 
 void test_version()
 {
-  int major, minor, patch;
+	Torch_Version version = cunder_torch_version();
 
-  cunder_torch_version(&major, &minor, &patch);
-
-  printf("version: %d.%d.%d\n", major, minor, patch);
+	printf("version: %d.%d.%d\n", version.major, version.minor, version.patch);
 }
 
 void test_ones_f64_1()
 {
-  cunder_at_Tensor *tp = cunder_torch_ones_1d(9, Cunder_kFloat64);
-  delete_cunder_at_Tensor(tp);
+	int shape[] = {9};
+	Cunder_Tensor *tp = cunder_tensor_ones(1, shape, Cunder_Float64);
+	cunder_tensor_free(tp);
 }
 
 void test_ones_f64_2()
 {
-  cunder_at_Tensor *tp = cunder_torch_ones_2d(9, 8, Cunder_kFloat32);
-  delete_cunder_at_Tensor(tp);
+	int shape[] = {9, 8};
+	Cunder_Tensor *tp = cunder_tensor_ones(2, shape, Cunder_Float32);
+	cunder_tensor_free(tp);
 }
 
 void test_ones_f64_3()
 {
-  cunder_at_Tensor *tp = cunder_torch_ones_3d(9, 8, 7, Cunder_kInt32);
-  delete_cunder_at_Tensor(tp);
+	int shape[] = {9, 8, 7};
+	Cunder_Tensor *tp = cunder_tensor_ones(3, shape, Cunder_Int32);
+	cunder_tensor_free(tp);
 }
 
 void test_ones_f64_4()
 {
-  cunder_at_Tensor *tp = cunder_torch_ones_4d(9, 8, 8, 8, Cunder_kInt16);
-  delete_cunder_at_Tensor(tp);
+	int shape[] = {9, 8, 8, 8};
+	Cunder_Tensor *tp = cunder_tensor_ones(4, shape, Cunder_Int16);
+	cunder_tensor_free(tp);
 }
 
 void test_zeros_f64_1()
 {
-  cunder_at_Tensor *tp = cunder_torch_zeros_1d(9, Cunder_kFloat64);
-  delete_cunder_at_Tensor(tp);
+	int shape[] = {9};
+	Cunder_Tensor *tp = cunder_tensor_zeros(1, shape, Cunder_Float64);
+	cunder_tensor_free(tp);
 }
 
 void test_zeros_f64_2()
 {
-  cunder_at_Tensor *tp = cunder_torch_zeros_2d(9, 8, Cunder_kFloat32);
-  delete_cunder_at_Tensor(tp);
+	int shape[] = {9, 8};
+	Cunder_Tensor *tp = cunder_tensor_zeros(2, shape, Cunder_Float32);
+	cunder_tensor_free(tp);
 }
 
 void test_zeros_f64_3()
 {
-  cunder_at_Tensor *tp = cunder_torch_zeros_3d(9, 8, 7, Cunder_kInt32);
-  delete_cunder_at_Tensor(tp);
+	int shape[] = {9, 8, 7};
+	Cunder_Tensor *tp = cunder_tensor_zeros(3, shape, Cunder_Int32);
+	cunder_tensor_free(tp);
 }
 
 void test_zeros_f64_4()
 {
-  cunder_at_Tensor *tp = cunder_torch_zeros_4d(9, 8, 8, 8, Cunder_kInt16);
-  delete_cunder_at_Tensor(tp);
+	int shape[] = {9, 8, 8, 8};
+	Cunder_Tensor *tp = cunder_tensor_zeros(3, shape, Cunder_Int16);
+	cunder_tensor_free(tp);
 }
 
-void test_torch_eye()
+void test_tensor_eye()
 {
-  cunder_at_Tensor *tp = cunder_torch_eye(8, Cunder_kInt8);
-  delete_cunder_at_Tensor(tp);
-}
-
-void test_cuda()
-{
-  int has_cuda = cunder_cuda_is_available();
-  printf("cuda? %d\n", has_cuda);
+	Cunder_Tensor *tp = cunder_tensor_eye(8, Cunder_Int8);
+	cunder_tensor_free(tp);
 }
 
 TEST_LIST = {
-    {"test", test_tutorial},
-    {"ones_1d", test_ones_f64_1},
-    {"ones_2d", test_ones_f64_2},
-    {"ones_3d", test_ones_f64_3},
-    {"ones_4d", test_ones_f64_4},
-    {"zeros_1d", test_zeros_f64_1},
-    {"zeros_2d", test_zeros_f64_2},
-    {"zeros_3d", test_zeros_f64_3},
-    {"zeros_4d", test_zeros_f64_4},
-    {"eye", test_torch_eye},
-    {"version", test_version},
-    {"cuda", test_cuda},
-    {NULL, NULL}};
+		{"test",     test_tutorial},
+		{"ones_1d",  test_ones_f64_1},
+		{"ones_2d",  test_ones_f64_2},
+		{"ones_3d",  test_ones_f64_3},
+		{"ones_4d",  test_ones_f64_4},
+		{"zeros_1d", test_zeros_f64_1},
+		{"zeros_2d", test_zeros_f64_2},
+		{"zeros_3d", test_zeros_f64_3},
+		{"zeros_4d", test_zeros_f64_4},
+		{"eye",      test_tensor_eye},
+		{"version",  test_version},
+		{NULL, NULL}};
