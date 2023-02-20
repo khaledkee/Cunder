@@ -38,7 +38,6 @@ extern "C"
 #endif // CUNDER_STATIC_DEFINE
 
 // definitions
-#define CUNDER_TENSOR_MAX_DIM 5
 
 // data
 typedef struct
@@ -50,7 +49,6 @@ typedef struct
 
 typedef enum
 {
-	Cunder_Invalid,
 	Cunder_Uint8,
 	Cunder_Int8,
 	Cunder_Int16,
@@ -58,18 +56,11 @@ typedef enum
 	Cunder_Int64,
 	Cunder_Float16,
 	Cunder_Float32,
-	Cunder_Float64
+	Cunder_Float64,
+	Cunder_Invalid
 } Cunder_DType;
 
-struct TensorData;
-
-typedef struct
-{
-	Cunder_DType dtype;
-	int ndim;
-	int shape[CUNDER_TENSOR_MAX_DIM];
-	struct TensorData *data;
-} Cunder_Tensor;
+typedef struct Cunder_Tensor Cunder_Tensor;
 
 // API
 CUNDER_EXPORT Torch_Version cunder_torch_version();
@@ -78,9 +69,9 @@ CUNDER_EXPORT Torch_Version cunder_torch_version();
 CUNDER_EXPORT int cunder_tensor_free(Cunder_Tensor *obj);
 
 // Initialize tensor without data
-CUNDER_EXPORT Cunder_Tensor *cunder_tensor_ones(int ndim, int *shape, Cunder_DType dtype);
+CUNDER_EXPORT Cunder_Tensor *cunder_tensor_ones(int ndim, const int *shape, Cunder_DType dtype);
 
-CUNDER_EXPORT Cunder_Tensor *cunder_tensor_zeros(int ndim, int *shape, Cunder_DType dtype);
+CUNDER_EXPORT Cunder_Tensor *cunder_tensor_zeros(int ndim, const int *shape, Cunder_DType dtype);
 
 CUNDER_EXPORT Cunder_Tensor *cunder_tensor_eye(int n, Cunder_DType dtype);
 
@@ -88,17 +79,24 @@ CUNDER_EXPORT Cunder_Tensor *cunder_tensor_range(int start, int end, int step, C
 
 // Initialize tensor with data
 
-CUNDER_EXPORT Cunder_Tensor *cunder_tensor_from_data_wrap(int ndim, int *shape, void *data, Cunder_DType dtype);
+CUNDER_EXPORT Cunder_Tensor *cunder_tensor_from_data_wrap(int ndim, const int *shape, void *data, Cunder_DType dtype);
 
-CUNDER_EXPORT Cunder_Tensor *cunder_tensor_from_data(int ndim, int *shape, void *data, Cunder_DType dtype, void (*free)(void *));
+CUNDER_EXPORT Cunder_Tensor *cunder_tensor_from_data(int ndim, const int *shape, void *data, Cunder_DType dtype, void (*free)(void *));
 
 // Tensor to()
 
 CUNDER_EXPORT void cunder_tensor_to(Cunder_Tensor *tensor, Cunder_DType dtype);
 
-// Tensor toString()
+// Tensor print()
 
 CUNDER_EXPORT void cunder_tensor_print(Cunder_Tensor *tensor);
+
+// Tensor info
+CUNDER_EXPORT Cunder_DType cunder_tensor_type(Cunder_Tensor *tensor);
+CUNDER_EXPORT int64_t cunder_tensor_ndim(Cunder_Tensor *tensor);
+CUNDER_EXPORT void cunder_tensor_shape(Cunder_Tensor *tensor, int64_t ndim, int64_t* out_shape);
+CUNDER_EXPORT int64_t cunder_tensor_numel(Cunder_Tensor *tensor);
+CUNDER_EXPORT int64_t cunder_tensor_dim_size(Cunder_Tensor *tensor, int64_t dim);
 
 #ifdef __cplusplus
 }
