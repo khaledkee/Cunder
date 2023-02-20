@@ -7,8 +7,7 @@ namespace cunder
 	inline static bool
 	is_valid_dtype(Cunder_DType dtype)
 	{
-		if ((dtype == Cunder_Uint8) || (dtype == Cunder_Int8) || (dtype == Cunder_Int16) || (dtype == Cunder_Int32) || (dtype == Cunder_Int64) ||
-			(dtype == Cunder_Float32) || (dtype == Cunder_Float64))
+		if (dtype >= 0 && dtype < Cunder_Invalid)
 		{
 			return true;
 		}
@@ -22,6 +21,9 @@ namespace cunder
 	{
 		switch (dtype)
 		{
+			case Cunder_Bool:
+				return torch::kBool;
+
 			case Cunder_Uint8:
 				return torch::kUInt8;
 
@@ -55,6 +57,9 @@ namespace cunder
 	{
 		switch (dtype)
 		{
+			case torch::kBool:
+				return Cunder_Bool;
+
 			case torch::kUInt8:
 				return Cunder_Uint8;
 
@@ -86,8 +91,8 @@ namespace cunder
 	{
 		switch (dtype)
 		{
-			case Cunder_Invalid:
-				return 0;
+			case Cunder_Bool:
+				return 1;
 
 			case Cunder_Uint8:
 			case Cunder_Int8:
@@ -103,6 +108,10 @@ namespace cunder
 			case Cunder_Int64:
 			case Cunder_Float64:
 				return 64;
+
+			case Cunder_Invalid:
+			default:
+				return 0;
 		}
 	}
 } // namespace cunder
@@ -281,6 +290,12 @@ int64_t
 cunder_tensor_dim_size(const Cunder_Tensor *tensor, int64_t dim)
 {
 	return tensor->tensor.size(dim);
+}
+
+const bool*
+cunder_tensor_accessor_b(const Cunder_Tensor *tensor)
+{
+	return tensor->tensor.data_ptr<bool>();
 }
 
 const uint8_t *

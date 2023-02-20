@@ -49,6 +49,7 @@ typedef struct
 
 typedef enum
 {
+	Cunder_Bool,
 	Cunder_Uint8,
 	Cunder_Int8,
 	Cunder_Int16,
@@ -100,6 +101,7 @@ CUNDER_EXPORT int64_t cunder_tensor_dim_size(const Cunder_Tensor *tensor, int64_
 
 // tensor accessors
 
+CUNDER_EXPORT const bool* cunder_tensor_accessor_b(const Cunder_Tensor *tensor);
 CUNDER_EXPORT const uint8_t* cunder_tensor_accessor_u8(const Cunder_Tensor *tensor);
 CUNDER_EXPORT const int8_t* cunder_tensor_accessor_i8(const Cunder_Tensor *tensor);
 CUNDER_EXPORT const int16_t* cunder_tensor_accessor_i16(const Cunder_Tensor *tensor);
