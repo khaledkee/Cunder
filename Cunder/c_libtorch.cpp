@@ -7,7 +7,7 @@ namespace cunder
 	inline static bool
 	is_valid_dtype(Cunder_DType dtype)
 	{
-		if ((dtype == Cunder_Uint8) || (dtype == Cunder_Int8) || (dtype == Cunder_Int16) || (dtype == Cunder_Int32) || (dtype == Cunder_Int64) || (dtype == Cunder_Float16) ||
+		if ((dtype == Cunder_Uint8) || (dtype == Cunder_Int8) || (dtype == Cunder_Int16) || (dtype == Cunder_Int32) || (dtype == Cunder_Int64) ||
 			(dtype == Cunder_Float32) || (dtype == Cunder_Float64))
 		{
 			return true;
@@ -36,9 +36,6 @@ namespace cunder
 
 			case Cunder_Int64:
 				return torch::kInt64;
-
-			case Cunder_Float16:
-				return torch::kFloat16;
 
 			case Cunder_Float32:
 				return torch::kFloat32;
@@ -73,9 +70,6 @@ namespace cunder
 			case torch::kInt64:
 				return Cunder_Int64;
 
-			case torch::kFloat16:
-				return Cunder_Float16;
-
 			case torch::kFloat32:
 				return Cunder_Float32;
 
@@ -100,7 +94,6 @@ namespace cunder
 				return 8;
 
 			case Cunder_Int16:
-			case Cunder_Float16:
 				return 16;
 
 			case Cunder_Int32:
@@ -131,9 +124,7 @@ int
 cunder_tensor_free(Cunder_Tensor *obj)
 {
 	if (obj == nullptr)
-	{
 		return -1;
-	}
 
 	free(obj);
 
@@ -152,9 +143,7 @@ _cunder_check_initialization_param(int ndim, const int *shape, Cunder_DType dtyp
 	if (!cunder::is_valid_dtype(dtype))
 		return nullptr;
 
-	auto *tensor = reinterpret_cast<Cunder_Tensor *>(malloc(sizeof(Cunder_Tensor)));
-
-	return tensor;
+	return new Cunder_Tensor();
 }
 
 Cunder_Tensor *
@@ -197,8 +186,7 @@ cunder_tensor_eye(int n, Cunder_DType dtype)
 		return nullptr;
 	}
 
-	auto *tensor = reinterpret_cast<Cunder_Tensor *>(malloc(sizeof(Cunder_Tensor)));
-
+	auto *tensor = new Cunder_Tensor();
 	tensor->tensor = torch::eye(n, cunder::get_libtorch_dtype(dtype));
 	return tensor;
 }
@@ -211,7 +199,7 @@ cunder_tensor_range(int start, int end, int step, Cunder_DType dtype)
 		return nullptr;
 	}
 
-	auto *tensor = reinterpret_cast<Cunder_Tensor *>(malloc(sizeof(Cunder_Tensor)));
+	auto *tensor = new Cunder_Tensor();
 	tensor->tensor = torch::range(start, end, step, cunder::get_libtorch_dtype(dtype));
 	return tensor;
 }
@@ -256,7 +244,7 @@ cunder_tensor_to(Cunder_Tensor *tensor, Cunder_DType dtype)
 }
 
 void
-cunder_tensor_print(Cunder_Tensor *tensor)
+cunder_tensor_print(const Cunder_Tensor *tensor)
 {
 	print(tensor->tensor);
 	printf("\n");
@@ -264,19 +252,19 @@ cunder_tensor_print(Cunder_Tensor *tensor)
 
 
 Cunder_DType
-cunder_tensor_type(Cunder_Tensor *tensor)
+cunder_tensor_type(const Cunder_Tensor *tensor)
 {
 	return cunder::get_cunder_dtype(tensor->tensor.scalar_type());
 }
 
 int64_t
-cunder_tensor_ndim(Cunder_Tensor *tensor)
+cunder_tensor_ndim(const Cunder_Tensor *tensor)
 {
 	return tensor->tensor.dim();
 }
 
 void
-cunder_tensor_shape(Cunder_Tensor *tensor, int64_t ndim, int64_t *out_shape)
+cunder_tensor_shape(const Cunder_Tensor *tensor, int64_t ndim, int64_t *out_shape)
 {
 	int64_t tensor_dims = tensor->tensor.dim();
 	for (int64_t i = 0; i < ndim && i < tensor_dims; ++i)
@@ -284,15 +272,56 @@ cunder_tensor_shape(Cunder_Tensor *tensor, int64_t ndim, int64_t *out_shape)
 }
 
 int64_t
-cunder_tensor_numel(Cunder_Tensor *tensor)
+cunder_tensor_numel(const Cunder_Tensor *tensor)
 {
 	return tensor->tensor.numel();
 }
 
 int64_t
-cunder_tensor_dim_size(Cunder_Tensor *tensor, int64_t dim)
+cunder_tensor_dim_size(const Cunder_Tensor *tensor, int64_t dim)
 {
 	return tensor->tensor.size(dim);
+}
+
+const uint8_t *
+cunder_tensor_accessor_u8(const Cunder_Tensor *tensor)
+{
+	return tensor->tensor.data_ptr<uint8_t>();
+}
+
+const int8_t *
+cunder_tensor_accessor_i8(const Cunder_Tensor *tensor)
+{
+	return tensor->tensor.data_ptr<int8_t>();
+}
+
+const int16_t *
+cunder_tensor_accessor_i16(const Cunder_Tensor *tensor)
+{
+	return tensor->tensor.data_ptr<int16_t>();
+}
+
+const int32_t *
+cunder_tensor_accessor_i32(const Cunder_Tensor *tensor)
+{
+	return tensor->tensor.data_ptr<int32_t>();
+}
+
+const int64_t *
+cunder_tensor_accessor_i64(const Cunder_Tensor *tensor)
+{
+	return tensor->tensor.data_ptr<int64_t>();
+}
+
+const float *
+cunder_tensor_accessor_f32(const Cunder_Tensor *tensor)
+{
+	return tensor->tensor.data_ptr<float>();
+}
+const double *
+cunder_tensor_accessor_f64(const Cunder_Tensor *tensor)
+{
+	return tensor->tensor.data_ptr<double>();
 }
 
 } // extern "C"

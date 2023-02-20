@@ -54,7 +54,6 @@ typedef enum
 	Cunder_Int16,
 	Cunder_Int32,
 	Cunder_Int64,
-	Cunder_Float16,
 	Cunder_Float32,
 	Cunder_Float64,
 	Cunder_Invalid
@@ -89,14 +88,25 @@ CUNDER_EXPORT void cunder_tensor_to(Cunder_Tensor *tensor, Cunder_DType dtype);
 
 // Tensor print()
 
-CUNDER_EXPORT void cunder_tensor_print(Cunder_Tensor *tensor);
+CUNDER_EXPORT void cunder_tensor_print(const Cunder_Tensor *tensor);
 
 // Tensor info
-CUNDER_EXPORT Cunder_DType cunder_tensor_type(Cunder_Tensor *tensor);
-CUNDER_EXPORT int64_t cunder_tensor_ndim(Cunder_Tensor *tensor);
-CUNDER_EXPORT void cunder_tensor_shape(Cunder_Tensor *tensor, int64_t ndim, int64_t* out_shape);
-CUNDER_EXPORT int64_t cunder_tensor_numel(Cunder_Tensor *tensor);
-CUNDER_EXPORT int64_t cunder_tensor_dim_size(Cunder_Tensor *tensor, int64_t dim);
+
+CUNDER_EXPORT Cunder_DType cunder_tensor_type(const Cunder_Tensor *tensor);
+CUNDER_EXPORT int64_t cunder_tensor_ndim(const Cunder_Tensor *tensor);
+CUNDER_EXPORT void cunder_tensor_shape(const Cunder_Tensor *tensor, int64_t ndim, int64_t* out_shape);
+CUNDER_EXPORT int64_t cunder_tensor_numel(const Cunder_Tensor *tensor);
+CUNDER_EXPORT int64_t cunder_tensor_dim_size(const Cunder_Tensor *tensor, int64_t dim);
+
+// tensor accessors
+
+CUNDER_EXPORT const uint8_t* cunder_tensor_accessor_u8(const Cunder_Tensor *tensor);
+CUNDER_EXPORT const int8_t* cunder_tensor_accessor_i8(const Cunder_Tensor *tensor);
+CUNDER_EXPORT const int16_t* cunder_tensor_accessor_i16(const Cunder_Tensor *tensor);
+CUNDER_EXPORT const int32_t* cunder_tensor_accessor_i32(const Cunder_Tensor *tensor);
+CUNDER_EXPORT const int64_t* cunder_tensor_accessor_i64(const Cunder_Tensor *tensor);
+CUNDER_EXPORT const float* cunder_tensor_accessor_f32(const Cunder_Tensor *tensor);
+CUNDER_EXPORT const double* cunder_tensor_accessor_f64(const Cunder_Tensor *tensor);
 
 #ifdef __cplusplus
 }
