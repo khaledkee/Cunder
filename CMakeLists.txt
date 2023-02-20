@@ -18,6 +18,12 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# TODO: don't use absolute path
+set(LIBTORCH_PATH "D:/Libtorch/Original/libtorch-win-shared-with-deps-1.13.1+cpu/libtorch")
+find_package(Torch PATHS ${LIBTORCH_PATH} NO_DEFAULT_PATH)
+find_package(Torch REQUIRED)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
 add_subdirectory(Cunder)
 
 if(CUNDER_BUILD_TESTS)

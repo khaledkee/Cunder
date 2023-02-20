@@ -2,8 +2,6 @@
 #define CUNDER_H_
 
 #include <stdint.h>
-#include <torch/all.h>
-#include <torch/script.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -28,10 +26,12 @@ extern "C"
 #endif // defined(_WIN32)
 #endif // CUNDER_EXPORT
 #
+
 #ifndef CUNDER_DEPRECATED
 #define CUNDER_DEPRECATED __declspec(deprecated)
 #endif // CUNDER_DEPRECATED
 #
+
 #ifndef CUNDER_DEPRECATED_EXPORT
 #define CUNDER_DEPRECATED_EXPORT CUNDER_EXPORT CUNDER_DEPRECATED
 #endif // CUNDER_DEPRECATED_EXPORT
@@ -40,83 +40,65 @@ extern "C"
 // definitions
 #define CUNDER_TENSOR_MAX_DIM 5
 
-	// data
-	struct Torch_Version
-	{
-		int major;
-		int minor;
-		int patch;
-	};
-	typedef enum
-	{
-		Cunder_kInvalid,
-		Cunder_kUint8,
-		Cunder_kInt8,
-		Cunder_kInt16,
-		Cunder_kInt32,
-		Cunder_kInt64,
-		Cunder_kFloat16,
-		Cunder_kFloat32,
-		Cunder_kFloat64
-	} Cunder_DType;
+// data
+typedef struct
+{
+	int major;
+	int minor;
+	int patch;
+} Torch_Version;
 
-	struct TensorData
-	{
-		at::Tensor tensor;
-	};
+typedef enum
+{
+	Cunder_Invalid,
+	Cunder_Uint8,
+	Cunder_Int8,
+	Cunder_Int16,
+	Cunder_Int32,
+	Cunder_Int64,
+	Cunder_Float16,
+	Cunder_Float32,
+	Cunder_Float64
+} Cunder_DType;
 
-	typedef struct
-	{
-		Cunder_DType dtype;
-		int ndim;
-		int shape[CUNDER_TENSOR_MAX_DIM];
-		struct TensorData *data;
-	} cunder_at_Tensor;
+struct TensorData;
 
-	// API
-	// Delete Tensor object.
-	CUNDER_EXPORT int delete_cunder_at_Tensor(cunder_at_Tensor *obj);
+typedef struct
+{
+	Cunder_DType dtype;
+	int ndim;
+	int shape[CUNDER_TENSOR_MAX_DIM];
+	struct TensorData *data;
+} Cunder_Tensor;
 
-	CUNDER_EXPORT void cunder_torch_version(int *major, int *minor, int *patch);
+// API
+CUNDER_EXPORT Torch_Version cunder_torch_version();
 
-	// Returns true: CUDA is availabe, 0: CUDA is not available
-	CUNDER_EXPORT int cunder_cuda_is_available();
+// Delete Tensor object.
+CUNDER_EXPORT int cunder_tensor_free(Cunder_Tensor *obj);
 
-	//******************************* torch::ones() *********************************//
-	CUNDER_EXPORT cunder_at_Tensor *cunder_torch_ones(int ndim, int *shape, Cunder_DType dtype);
+// Initialize tensor without data
+CUNDER_EXPORT Cunder_Tensor *cunder_tensor_ones(int ndim, int *shape, Cunder_DType dtype);
 
-	// Alias for torch::ones({sz0});
-	CUNDER_EXPORT cunder_at_Tensor *cunder_torch_ones_1d(int sz0, Cunder_DType dtype);
+CUNDER_EXPORT Cunder_Tensor *cunder_tensor_zeros(int ndim, int *shape, Cunder_DType dtype);
 
-	// Alias for torch::ones({sz0, sz1});
-	CUNDER_EXPORT cunder_at_Tensor *cunder_torch_ones_2d(int sz0, int sz1, Cunder_DType dtype);
+CUNDER_EXPORT Cunder_Tensor *cunder_tensor_eye(int n, Cunder_DType dtype);
 
-	// Alias for torch::ones({sz0, sz1, sz2});
-	CUNDER_EXPORT cunder_at_Tensor *cunder_torch_ones_3d(int sz0, int sz1, int sz2, Cunder_DType dtype);
+CUNDER_EXPORT Cunder_Tensor *cunder_tensor_range(int start, int end, int step, Cunder_DType dtype);
 
-	// Alias for torch::ones({sz0, sz1, sz2, sz3});
-	CUNDER_EXPORT cunder_at_Tensor *cunder_torch_ones_4d(int sz0, int sz1, int sz2, int sz3, Cunder_DType dtype);
+// Initialize tensor with data
 
-	//******************************* torch::zeros() *********************************//
-	CUNDER_EXPORT cunder_at_Tensor *cunder_torch_zeros(int ndim, int *shape, Cunder_DType dtype);
+CUNDER_EXPORT Cunder_Tensor *cunder_tensor_from_data_wrap(int ndim, int *shape, void *data, Cunder_DType dtype);
 
-	// Alias for torch::zeros({sz0});
-	CUNDER_EXPORT cunder_at_Tensor *cunder_torch_zeros_1d(int sz0, Cunder_DType dtype);
+CUNDER_EXPORT Cunder_Tensor *cunder_tensor_from_data(int ndim, int *shape, void *data, Cunder_DType dtype, void (*free)(void *));
 
-	// Alias for torch::zeros({sz0, sz1});
-	CUNDER_EXPORT cunder_at_Tensor *cunder_torch_zeros_2d(int sz0, int sz1, Cunder_DType dtype);
+// Tensor to()
 
-	// Alias for torch::zeros({sz0, sz1, sz2});
-	CUNDER_EXPORT cunder_at_Tensor *cunder_torch_zeros_3d(int sz0, int sz1, int sz2, Cunder_DType dtype);
+CUNDER_EXPORT void cunder_tensor_to(Cunder_Tensor *tensor, Cunder_DType dtype);
 
-	// Alias for torch::zeros({sz0, sz1, sz2, sz3});
-	CUNDER_EXPORT cunder_at_Tensor *cunder_torch_zeros_4d(int sz0, int sz1, int sz2, int sz3, Cunder_DType dtype);
+// Tensor toString()
 
-	// torch::eye()
-	CUNDER_EXPORT cunder_at_Tensor *cunder_torch_eye(int n, Cunder_DType dtype);
-
-	// torch::range()
-	CUNDER_EXPORT cunder_at_Tensor *cunder_torch_range(int start, int end, int step, Cunder_DType dtype);
+CUNDER_EXPORT void cunder_tensor_print(Cunder_Tensor *tensor);
 
 #ifdef __cplusplus
 }
