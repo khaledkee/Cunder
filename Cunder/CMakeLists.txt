@@ -12,6 +12,7 @@ target_link_libraries(cunder
     PUBLIC
     "${TORCH_LIBRARIES}"
 )
+message(STATUS "${TORCH_LIBRARIES}")
 
 target_compile_options(cunder
     PRIVATE -Wall -pedantic -fno-omit-frame-pointer -O3
