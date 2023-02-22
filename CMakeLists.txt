@@ -19,7 +19,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # TODO: don't use absolute path
-set(LIBTORCH_PATH "D:/Libtorch/Original/libtorch-win-shared-with-deps-debug-1.13.1+cpu/libtorch")
+IF(CMAKE_BUILD_TYPE MATCHES "Debug")
+    set(LIBTORCH_PATH "D:/Libtorch/Original/libtorch-win-shared-with-deps-debug-1.13.1+cpu/libtorch")
+ELSE(CMAKE_BUILD_TYPE MATCHES "Debug")
+    set(LIBTORCH_PATH "D:/Libtorch/Original/libtorch-win-shared-with-deps-1.13.1+cpu/libtorch")
+ENDIF(CMAKE_BUILD_TYPE MATCHES "Debug")
 message(STATUS ${LIBTORCH_PATH})
 find_package(Torch PATHS "${LIBTORCH_PATH}" NO_DEFAULT_PATH)
 find_package(Torch REQUIRED)

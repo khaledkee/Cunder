@@ -66,7 +66,6 @@ int main(int argc, char *argv[])
 
 	cunder_tensor_free(cunder_data_tensor);
 
-
 	// cunder_module
 	Cunder_Module *cunder_module = cunder_module_load("D:\\model.pt");
 	cunder_module_dump(cunder_module);
