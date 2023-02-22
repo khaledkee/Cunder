@@ -62,14 +62,18 @@ extern "C"
 	} Cunder_DType;
 
 	typedef struct Cunder_Tensor Cunder_Tensor;
+	typedef struct Cunder_Module Cunder_Module;
 
 	// API
 	CUNDER_EXPORT Torch_Version
 	cunder_torch_version();
 
-	// Delete Tensor object.
+	// Delete objects.
 	CUNDER_EXPORT int
-	cunder_tensor_free(Cunder_Tensor *obj);
+	cunder_tensor_free(Cunder_Tensor *self);
+
+	CUNDER_EXPORT int
+	cunder_module_free(Cunder_Module *self);
 
 	// Initialize tensor without data
 	CUNDER_EXPORT Cunder_Tensor *
@@ -133,6 +137,14 @@ extern "C"
 	cunder_tensor_accessor_f32(const Cunder_Tensor *tensor);
 	CUNDER_EXPORT const double *
 	cunder_tensor_accessor_f64(const Cunder_Tensor *tensor);
+
+	// torch jit load
+	CUNDER_EXPORT Cunder_Module *
+	cunder_module_load(const char *filename);
+
+	CUNDER_EXPORT void
+	cunder_module_dump(
+		const Cunder_Module *module, bool print_method_bodies = false, bool print_attr_values = false, bool print_param_values = false);
 
 #ifdef __cplusplus
 }

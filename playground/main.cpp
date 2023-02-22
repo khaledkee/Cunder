@@ -11,7 +11,7 @@ void pretty_print(const std::string &info, T &&data)
 			  << std::endl;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
 	Torch_Version version = cunder_torch_version();
 	printf("Cunder torch version: %d.%d.%d\n", version.major, version.minor, version.patch);
@@ -65,6 +65,12 @@ int main()
 		std::cout << tensor_accessor[i] << ",\n"[i == 2];
 
 	cunder_tensor_free(cunder_data_tensor);
+
+
+	// cunder_module
+	Cunder_Module *cunder_module = cunder_module_load("D:\\model.pt");
+	cunder_module_dump(cunder_module);
+	cunder_module_free(cunder_module);
 
 	return 0;
 }

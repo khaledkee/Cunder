@@ -1,6 +1,6 @@
-#include "c_libtorch.h"
 #include <torch/all.h>
 #include <torch/script.h>
+#include "c_libtorch.h"
 
 namespace cunder
 {
@@ -123,6 +123,11 @@ extern "C"
 		torch::Tensor tensor;
 	};
 
+	struct Cunder_Module
+	{
+		torch::jit::Module module;
+	};
+
 	Torch_Version
 	cunder_torch_version()
 	{
@@ -130,12 +135,25 @@ extern "C"
 	}
 
 	int
-	cunder_tensor_free(Cunder_Tensor *obj)
+	cunder_tensor_free(Cunder_Tensor *self)
 	{
-		if (obj == nullptr)
+		if (self == nullptr)
 			return -1;
 
-		free(obj);
+		self->tensor.~Tensor();
+		free(self);
+
+		return 0; // success
+	}
+
+	int
+	cunder_module_free(Cunder_Module *self)
+	{
+		if (self == nullptr)
+			return -1;
+
+		self->module.~Module();
+		free(self);
 
 		return 0; // success
 	}
@@ -255,6 +273,8 @@ extern "C"
 	void
 	cunder_tensor_print(const Cunder_Tensor *tensor)
 	{
+		if (tensor == nullptr)
+			return;
 		print(tensor->tensor);
 		printf("\n");
 	}
@@ -336,6 +356,34 @@ extern "C"
 	cunder_tensor_accessor_f64(const Cunder_Tensor *tensor)
 	{
 		return tensor->tensor.data_ptr<double>();
+	}
+
+	Cunder_Module *
+	cunder_module_load(const char *filename)
+	{
+		torch::jit::Module module;
+
+		try
+		{
+			module = torch::jit::load(filename);
+		} catch (const c10::Error &e)
+		{
+			printf("%s\n", e.msg().c_str());
+			printf("%s\n", e.what());
+			return nullptr;
+		}
+
+		Cunder_Module *cunder_module = new Cunder_Module();
+		cunder_module->module = module;
+		return cunder_module;
+	}
+
+	void
+	cunder_module_dump(const Cunder_Module *module, bool print_method_bodies, bool print_attr_values, bool print_param_values)
+	{
+		if (module == nullptr)
+			return;
+		module->module.dump(print_method_bodies, print_attr_values, print_param_values);
 	}
 
 } // extern "C"

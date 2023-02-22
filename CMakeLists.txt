@@ -19,8 +19,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # TODO: don't use absolute path
-set(LIBTORCH_PATH "D:/Libtorch/Original/libtorch-win-shared-with-deps-1.13.1+cpu/libtorch")
-find_package(Torch PATHS ${LIBTORCH_PATH} NO_DEFAULT_PATH)
+set(LIBTORCH_PATH "D:/Libtorch/Original/libtorch-win-shared-with-deps-debug-1.13.1+cpu/libtorch")
+message(STATUS ${LIBTORCH_PATH})
+find_package(Torch PATHS "${LIBTORCH_PATH}" NO_DEFAULT_PATH)
 find_package(Torch REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
@@ -36,7 +37,6 @@ if(CUNDER_BUILD_TESTS)
     # GIT_SHALLOW TRUE
     # EXCLUDE_FROM_ALL TRUE
     # )
-    # add_subdirectory(unittests)
     add_subdirectory(playground)
     add_subdirectory(unittests)
 endif()
