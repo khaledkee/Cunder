@@ -16,12 +16,6 @@ int main(int argc, char *argv[])
 	Torch_Version version = cunder_torch_version();
 	printf("Cunder torch version: %d.%d.%d\n", version.major, version.minor, version.patch);
 
-	// cunder_module
-	Cunder_Module *cunder_module = cunder_module_load("D:\\model.pt");
-	cunder_module_dump(cunder_module);
-	cunder_module_free(cunder_module);
-	return 0;
-
 	// Create an eye tensor
 	auto eye_tensor = torch::eye(3);
 	auto *cunder_eye_tensor = cunder_tensor_eye(3, Cunder_DType::Cunder_Float64);
@@ -71,6 +65,12 @@ int main(int argc, char *argv[])
 		std::cout << tensor_accessor[i] << ",\n"[i == 2];
 
 	cunder_tensor_free(cunder_data_tensor);
+
+
+	// cunder_module
+	Cunder_Module *cunder_module = cunder_module_load("D:\\model.pt");
+	cunder_module_dump(cunder_module);
+	cunder_module_free(cunder_module);
 
 	return 0;
 }
