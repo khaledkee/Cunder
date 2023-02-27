@@ -1,17 +1,17 @@
 #include "c_libtorch.h"
 
-#include <torch/torch.h>
 #include <iostream>
 
 template<typename T>
-void pretty_print(const std::string &info, T &&data)
+void
+pretty_print(const std::string &info, T &&data)
 {
 	std::cout << info << std::endl;
-	std::cout << data << std::endl
-			  << std::endl;
+	std::cout << data << std::endl << std::endl;
 }
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
 	Torch_Version version = cunder_torch_version();
 	printf("Cunder torch version: %d.%d.%d\n", version.major, version.minor, version.patch);
@@ -70,6 +70,43 @@ int main(int argc, char *argv[])
 	Cunder_Module *cunder_module = cunder_module_load("D:\\model.pt");
 	cunder_module_dump(cunder_module);
 	cunder_module_free(cunder_module);
+
+	auto allocated_cunder_zeros_tensor = new Cunder_Tensor{};
+	allocated_cunder_zeros_tensor =
+		allocated_cunder_tensor_zeros(allocated_cunder_zeros_tensor, 1, tensor_data_shape, Cunder_DType::Cunder_Float32);
+	cunder_print_torch_attrs(allocated_cunder_zeros_tensor);
+	cunder_tensor_free(allocated_cunder_zeros_tensor);
+
+	auto allocated_cunder_ones_tensor = new Cunder_Tensor{};
+	allocated_cunder_ones_tensor =
+		allocated_cunder_tensor_ones(allocated_cunder_ones_tensor, 1, tensor_data_shape, Cunder_DType::Cunder_Float32);
+	cunder_print_torch_attrs(allocated_cunder_ones_tensor);
+	cunder_tensor_free(allocated_cunder_ones_tensor);
+
+	auto allocated_cunder_eye_tensor = new Cunder_Tensor{};
+	allocated_cunder_eye_tensor = allocated_cunder_tensor_eye(allocated_cunder_eye_tensor, 1, Cunder_DType::Cunder_Float32);
+	cunder_print_torch_attrs(allocated_cunder_eye_tensor);
+	cunder_tensor_free(allocated_cunder_eye_tensor);
+
+	auto allocated_cunder_range_tensor = new Cunder_Tensor{};
+	allocated_cunder_range_tensor = allocated_cunder_tensor_range(allocated_cunder_range_tensor, 1, 9, 1, Cunder_DType::Cunder_Float32);
+	cunder_print_torch_attrs(allocated_cunder_range_tensor);
+	cunder_tensor_free(allocated_cunder_range_tensor);
+
+	auto allocated_cunder_data_tensor = new Cunder_Tensor{};
+	allocated_cunder_tensor_from_data(
+		allocated_cunder_data_tensor, 1, tensor_data_shape, tensor_data, Cunder_DType::Cunder_Float32, nullptr);
+	cunder_print_torch_attrs(allocated_cunder_data_tensor);
+
+	auto allocated_cunder_data_tensor_clone = new Cunder_Tensor{};
+	allocated_cunder_data_tensor_clone = allocated_cunder_tensor_clone(allocated_cunder_data_tensor_clone, allocated_cunder_data_tensor);
+	cunder_print_torch_attrs(allocated_cunder_data_tensor_clone);
+	cunder_tensor_free(allocated_cunder_data_tensor_clone);
+
+	auto cunder_data_tensor_clone = cunder_tensor_clone(allocated_cunder_data_tensor);
+	cunder_print_torch_attrs(cunder_data_tensor_clone);
+	cunder_tensor_free(cunder_data_tensor_clone);
+	cunder_tensor_free(allocated_cunder_data_tensor);
 
 	return 0;
 }

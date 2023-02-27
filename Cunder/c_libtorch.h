@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <torch/torch.h>
+#include <torch/script.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -26,12 +28,10 @@ extern "C"
 #define CUNDER_EXPORT __attribute__((visibility("default")))
 #endif // defined(_WIN32)
 #endif // CUNDER_EXPORT
-#
 
 #ifndef CUNDER_DEPRECATED
 #define CUNDER_DEPRECATED __declspec(deprecated)
 #endif // CUNDER_DEPRECATED
-#
 
 #ifndef CUNDER_DEPRECATED_EXPORT
 #define CUNDER_DEPRECATED_EXPORT CUNDER_EXPORT CUNDER_DEPRECATED
@@ -39,6 +39,15 @@ extern "C"
 #endif // CUNDER_STATIC_DEFINE
 
 	// definitions
+	struct Cunder_Tensor
+	{
+		torch::Tensor tensor;
+	};
+
+	struct Cunder_Module
+	{
+		torch::jit::Module module;
+	};
 
 	// data
 	typedef struct
@@ -72,6 +81,12 @@ extern "C"
 	CUNDER_EXPORT int
 	cunder_tensor_free(Cunder_Tensor *self);
 
+	CUNDER_EXPORT Cunder_Tensor *
+	cunder_tensor_clone(Cunder_Tensor *src);
+
+	CUNDER_EXPORT Cunder_Tensor *
+	allocated_cunder_tensor_clone(Cunder_Tensor *out, Cunder_Tensor *src);
+
 	CUNDER_EXPORT int
 	cunder_module_free(Cunder_Module *self);
 
@@ -80,13 +95,25 @@ extern "C"
 	cunder_tensor_ones(int ndim, const int *shape, Cunder_DType dtype);
 
 	CUNDER_EXPORT Cunder_Tensor *
+	allocated_cunder_tensor_ones(Cunder_Tensor *tensor, int ndim, const int *shape, Cunder_DType dtype);
+
+	CUNDER_EXPORT Cunder_Tensor *
 	cunder_tensor_zeros(int ndim, const int *shape, Cunder_DType dtype);
+
+	CUNDER_EXPORT Cunder_Tensor *
+	allocated_cunder_tensor_zeros(Cunder_Tensor *tensor, int ndim, const int *shape, Cunder_DType dtype);
 
 	CUNDER_EXPORT Cunder_Tensor *
 	cunder_tensor_eye(int n, Cunder_DType dtype);
 
 	CUNDER_EXPORT Cunder_Tensor *
+	allocated_cunder_tensor_eye(Cunder_Tensor *tensor, int n, Cunder_DType dtype);
+
+	CUNDER_EXPORT Cunder_Tensor *
 	cunder_tensor_range(int start, int end, int step, Cunder_DType dtype);
+
+	CUNDER_EXPORT Cunder_Tensor *
+	allocated_cunder_tensor_range(Cunder_Tensor *tensor, int start, int end, int step, Cunder_DType dtype);
 
 	// Initialize tensor with data
 
@@ -94,7 +121,14 @@ extern "C"
 	cunder_tensor_from_data_wrap(int ndim, const int *shape, void *data, Cunder_DType dtype);
 
 	CUNDER_EXPORT Cunder_Tensor *
+	allocated_cunder_tensor_from_data_wrap(Cunder_Tensor *tensor, int ndim, const int *shape, void *data, Cunder_DType dtype);
+
+	CUNDER_EXPORT Cunder_Tensor *
 	cunder_tensor_from_data(int ndim, const int *shape, void *data, Cunder_DType dtype, void (*free)(void *));
+
+	CUNDER_EXPORT Cunder_Tensor *
+	allocated_cunder_tensor_from_data(
+		Cunder_Tensor *tensor, int ndim, const int *shape, void *data, Cunder_DType dtype, void (*free)(void *));
 
 	// Tensor to()
 
@@ -112,8 +146,8 @@ extern "C"
 	cunder_tensor_type(const Cunder_Tensor *tensor);
 	CUNDER_EXPORT int64_t
 	cunder_tensor_ndim(const Cunder_Tensor *tensor);
-	CUNDER_EXPORT void
-	cunder_tensor_shape(const Cunder_Tensor *tensor, int64_t ndim, int64_t *out_shape);
+	CUNDER_EXPORT int64_t *
+	cunder_tensor_shape(const Cunder_Tensor *tensor, int64_t &ndim);
 	CUNDER_EXPORT int64_t
 	cunder_tensor_numel(const Cunder_Tensor *tensor);
 	CUNDER_EXPORT int64_t
@@ -145,6 +179,9 @@ extern "C"
 	CUNDER_EXPORT void
 	cunder_module_dump(
 		const Cunder_Module *module, bool print_method_bodies = false, bool print_attr_values = false, bool print_param_values = false);
+
+	CUNDER_EXPORT void
+	cunder_print_torch_attrs(Cunder_Tensor *tensor);
 
 #ifdef __cplusplus
 }
