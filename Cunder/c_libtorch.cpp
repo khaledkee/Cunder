@@ -118,6 +118,8 @@ namespace cunder
 
 extern "C"
 {
+
+	// definitions
 	struct Cunder_Tensor
 	{
 		torch::Tensor tensor;
@@ -128,10 +130,48 @@ extern "C"
 		torch::jit::Module module;
 	};
 
+	void
+	cunder_get_tensor_size_alignment(int64_t &size, int64_t &alignment)
+	{
+		size = sizeof(Cunder_Tensor);
+		alignment = alignof(Cunder_Tensor);
+	}
+
+	void
+	cunder_get_module_size_alignment(int64_t &size, int64_t &alignment)
+	{
+		size = sizeof(Cunder_Module);
+		alignment = alignof(Cunder_Module);
+	}
+
 	Torch_Version
 	cunder_torch_version()
 	{
 		return Torch_Version{TORCH_VERSION_MAJOR, TORCH_VERSION_MINOR, TORCH_VERSION_PATCH};
+	}
+
+	Cunder_Tensor *
+	cunder_tensor_clone(Cunder_Tensor *src)
+	{
+		if (src == nullptr)
+			return nullptr;
+
+		auto out = new Cunder_Tensor{};
+		out->tensor = src->tensor.clone();
+		return out;
+	}
+
+	void
+	cunder_tensor_clone_allocated(void *out_void, void *src_void)
+	{
+		Cunder_Tensor *src = (Cunder_Tensor *)src_void;
+		Cunder_Tensor *out = (Cunder_Tensor *)out_void;
+		if (src == nullptr)
+			return;
+
+		if (out->tensor.getIntrusivePtr() == nullptr)
+			out->tensor.unsafeReleaseTensorImpl();
+		out->tensor = src->tensor.clone();
 	}
 
 	int
@@ -158,60 +198,69 @@ extern "C"
 		return 0; // success
 	}
 
-	inline static Cunder_Tensor *
+	int
+	cunder_tensor_free_allocated(void *self_void)
+	{
+		Cunder_Tensor *self = (Cunder_Tensor *)self_void;
+		if (self == nullptr)
+			return -1;
+
+		self->tensor.~Tensor();
+		_aligned_free(self);
+
+		return 0; // success
+	}
+
+	int
+	cunder_module_free_allocated(void *self_void)
+	{
+		Cunder_Module *self = (Cunder_Module *)self_void;
+		if (self == nullptr)
+			return -1;
+
+		self->module.~Module();
+		_aligned_free(self);
+
+		return 0; // success
+	}
+
+	inline static bool
 	_cunder_check_initialization_param(int ndim, const int *shape, Cunder_DType dtype)
 	{
-		if (ndim < 1)
-			return nullptr;
-
-		if (shape == nullptr)
-			return nullptr;
-
-		if (!cunder::is_valid_dtype(dtype))
-			return nullptr;
-
-		return new Cunder_Tensor();
+		if (ndim < 1 || ndim > 3 || shape == nullptr || cunder::is_valid_dtype(dtype) == false)
+			return false;
+		return true;
 	}
 
 	Cunder_Tensor *
 	cunder_tensor_ones(int ndim, const int *shape, Cunder_DType dtype)
 	{
-		auto tensor = _cunder_check_initialization_param(ndim, shape, dtype);
-		if (tensor == nullptr)
+		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
 			return nullptr;
+		Cunder_Tensor *tensor = new Cunder_Tensor{};
 
-		std::vector<int64_t> vshape;
-		for (int i = 0; i < ndim; i++)
-			vshape.push_back(shape[i]);
-
+		std::vector<int64_t> vshape(shape, shape + ndim);
 		tensor->tensor = torch::ones(vshape, cunder::get_libtorch_dtype(dtype));
-
 		return tensor;
 	}
 
 	Cunder_Tensor *
 	cunder_tensor_zeros(int ndim, const int *shape, Cunder_DType dtype)
 	{
-		auto tensor = _cunder_check_initialization_param(ndim, shape, dtype);
-		if (tensor == nullptr)
+		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
 			return nullptr;
+		Cunder_Tensor *tensor = new Cunder_Tensor{};
 
-		std::vector<int64_t> vshape;
-		for (int i = 0; i < ndim; i++)
-			vshape.push_back(shape[i]);
-
+		std::vector<int64_t> vshape(shape, shape + ndim);
 		tensor->tensor = torch::zeros(vshape, cunder::get_libtorch_dtype(dtype));
-
 		return tensor;
 	}
 
 	Cunder_Tensor *
 	cunder_tensor_eye(int n, Cunder_DType dtype)
 	{
-		if (!cunder::is_valid_dtype(dtype))
-		{
+		if (cunder::is_valid_dtype(dtype) == false)
 			return nullptr;
-		}
 
 		auto *tensor = new Cunder_Tensor();
 		tensor->tensor = torch::eye(n, cunder::get_libtorch_dtype(dtype));
@@ -221,27 +270,74 @@ extern "C"
 	Cunder_Tensor *
 	cunder_tensor_range(int start, int end, int step, Cunder_DType dtype)
 	{
-		if (!cunder::is_valid_dtype(dtype))
-		{
+		if (cunder::is_valid_dtype(dtype) == false)
 			return nullptr;
-		}
 
 		auto *tensor = new Cunder_Tensor();
 		tensor->tensor = torch::range(start, end, step, cunder::get_libtorch_dtype(dtype));
 		return tensor;
 	}
 
+	void
+	cunder_tensor_ones_allocated(void *tensor_void, int ndim, const int *shape, Cunder_DType dtype)
+	{
+		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
+			return;
+
+		std::vector<int64_t> vshape(shape, shape + ndim);
+		Cunder_Tensor *tensor = (Cunder_Tensor *)tensor_void;
+
+		if (tensor->tensor.getIntrusivePtr() == nullptr)
+			tensor->tensor.unsafeReleaseTensorImpl();
+		tensor->tensor = torch::ones(vshape, cunder::get_libtorch_dtype(dtype));
+	}
+
+	void
+	cunder_tensor_zeros_allocated(void *tensor_void, int ndim, const int *shape, Cunder_DType dtype)
+	{
+		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
+			return;
+
+		std::vector<int64_t> vshape(shape, shape + ndim);
+		Cunder_Tensor *tensor = (Cunder_Tensor *)tensor_void;
+
+		if (tensor->tensor.getIntrusivePtr() == nullptr)
+			tensor->tensor.unsafeReleaseTensorImpl();
+		tensor->tensor = torch::zeros(vshape, cunder::get_libtorch_dtype(dtype));
+	}
+
+	void
+	cunder_tensor_eye_allocated(void *tensor_void, int n, Cunder_DType dtype)
+	{
+		if (cunder::is_valid_dtype(dtype) == false)
+			return;
+
+		Cunder_Tensor *tensor = (Cunder_Tensor *)tensor_void;
+		if (tensor->tensor.getIntrusivePtr() == nullptr)
+			tensor->tensor.unsafeReleaseTensorImpl();
+		tensor->tensor = torch::eye(n, cunder::get_libtorch_dtype(dtype));
+	}
+
+	void
+	cunder_tensor_range_allocated(void *tensor_void, int start, int end, int step, Cunder_DType dtype)
+	{
+		if (cunder::is_valid_dtype(dtype) == false)
+			return;
+
+		Cunder_Tensor *tensor = (Cunder_Tensor *)tensor_void;
+		if (tensor->tensor.getIntrusivePtr() == nullptr)
+			tensor->tensor.unsafeReleaseTensorImpl();
+		tensor->tensor = torch::range(start, end, step, cunder::get_libtorch_dtype(dtype));
+	}
+
 	Cunder_Tensor *
 	cunder_tensor_from_data_wrap(int ndim, const int *shape, void *data, Cunder_DType dtype)
 	{
-		auto tensor = _cunder_check_initialization_param(ndim, shape, dtype);
-		if (tensor == nullptr)
+		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
 			return nullptr;
+		Cunder_Tensor *tensor = new Cunder_Tensor{};
 
-		std::vector<int64_t> vshape;
-		for (int i = 0; i < ndim; i++)
-			vshape.push_back(shape[i]);
-
+		std::vector<int64_t> vshape(shape, shape + ndim);
 		tensor->tensor = torch::from_blob(data, vshape, torch::TensorOptions(cunder::get_libtorch_dtype(dtype)));
 		return tensor;
 	}
@@ -249,17 +345,41 @@ extern "C"
 	Cunder_Tensor *
 	cunder_tensor_from_data(int ndim, const int *shape, void *data, Cunder_DType dtype, void (*free)(void *))
 	{
-		auto tensor = _cunder_check_initialization_param(ndim, shape, dtype);
-		if (tensor == nullptr)
+		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
 			return nullptr;
+		Cunder_Tensor *tensor = new Cunder_Tensor{};
 
-		std::vector<int64_t> vshape;
-		for (int i = 0; i < ndim; i++)
-			vshape.push_back(shape[i]);
-
+		std::vector<int64_t> vshape(shape, shape + ndim);
 		tensor->tensor = torch::from_blob(data, vshape, free, torch::TensorOptions(cunder::get_libtorch_dtype(dtype)));
-
 		return tensor;
+	}
+
+	void
+	cunder_tensor_from_data_wrap_allocated(void *tensor_void, int ndim, const int *shape, void *data, Cunder_DType dtype)
+	{
+		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
+			return;
+
+		std::vector<int64_t> vshape(shape, shape + ndim);
+		Cunder_Tensor *tensor = (Cunder_Tensor *)tensor_void;
+
+		if (tensor->tensor.getIntrusivePtr() == nullptr)
+			tensor->tensor.unsafeReleaseTensorImpl();
+		tensor->tensor = torch::from_blob(data, vshape, torch::TensorOptions(cunder::get_libtorch_dtype(dtype)));
+	}
+
+	void
+	cunder_tensor_from_data_allocated(void *tensor_void, int ndim, const int *shape, void *data, Cunder_DType dtype, void (*free)(void *))
+	{
+		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
+			return;
+
+		std::vector<int64_t> vshape(shape, shape + ndim);
+		Cunder_Tensor *tensor = (Cunder_Tensor *)tensor_void;
+
+		if (tensor->tensor.getIntrusivePtr() == nullptr)
+			tensor->tensor.unsafeReleaseTensorImpl();
+		tensor->tensor = torch::from_blob(data, vshape, free, torch::TensorOptions(cunder::get_libtorch_dtype(dtype)));
 	}
 
 	void
@@ -267,6 +387,19 @@ extern "C"
 	{
 		if (tensor == nullptr)
 			return;
+
+		tensor->tensor = tensor->tensor.toType(cunder::get_libtorch_dtype(dtype));
+	}
+
+	void
+	cunder_tensor_to_allocated(void *tensor_void, Cunder_DType dtype)
+	{
+		Cunder_Tensor *tensor = (Cunder_Tensor *)tensor_void;
+		if (tensor == nullptr)
+			return;
+
+		if (tensor->tensor.getIntrusivePtr() == nullptr)
+			tensor->tensor.unsafeReleaseTensorImpl();
 		tensor->tensor = tensor->tensor.toType(cunder::get_libtorch_dtype(dtype));
 	}
 
@@ -277,6 +410,13 @@ extern "C"
 			return;
 		print(tensor->tensor);
 		printf("\n");
+	}
+
+	void
+	cunder_tensor_print_allocated(const void *tensor_void)
+	{
+		auto tensor = (Cunder_Tensor *)tensor_void;
+		cunder_tensor_print(tensor);
 	}
 
 	Cunder_DType
@@ -292,11 +432,11 @@ extern "C"
 	}
 
 	void
-	cunder_tensor_shape(const Cunder_Tensor *tensor, int64_t ndim, int64_t *out_shape)
+	cunder_tensor_shape(const Cunder_Tensor *tensor, int64_t *out_shape)
 	{
-		int64_t tensor_dims = tensor->tensor.dim();
-		for (int64_t i = 0; i < ndim && i < tensor_dims; ++i)
-			out_shape[i] = tensor->tensor.size(i);
+		int d = 0;
+		for (int64_t size : tensor->tensor.sizes())
+			out_shape[d++] = size;
 	}
 
 	int64_t
@@ -309,6 +449,41 @@ extern "C"
 	cunder_tensor_dim_size(const Cunder_Tensor *tensor, int64_t dim)
 	{
 		return tensor->tensor.size(dim);
+	}
+
+	Cunder_DType
+	cunder_tensor_type_allocated(const void *tensor_void)
+	{
+		auto tensor = (Cunder_Tensor *)tensor_void;
+		return cunder_tensor_type(tensor);
+	}
+
+	int64_t
+	cunder_tensor_ndim_allocated(const void *tensor_void)
+	{
+		auto tensor = (Cunder_Tensor *)tensor_void;
+		return cunder_tensor_ndim(tensor);
+	}
+
+	void
+	cunder_tensor_shape_allocated(const void *tensor_void, int64_t *out_shape)
+	{
+		auto tensor = (Cunder_Tensor *)tensor_void;
+		cunder_tensor_shape(tensor, out_shape);
+	}
+
+	int64_t
+	cunder_tensor_numel_allocated(const void *tensor_void)
+	{
+		auto tensor = (Cunder_Tensor *)tensor_void;
+		return cunder_tensor_numel(tensor);
+	}
+
+	int64_t
+	cunder_tensor_dim_size_allocated(const void *tensor_void, int64_t dim)
+	{
+		auto tensor = (Cunder_Tensor *)tensor_void;
+		return cunder_tensor_dim_size(tensor, dim);
 	}
 
 	const bool *
@@ -352,6 +527,7 @@ extern "C"
 	{
 		return tensor->tensor.data_ptr<float>();
 	}
+
 	const double *
 	cunder_tensor_accessor_f64(const Cunder_Tensor *tensor)
 	{
@@ -383,7 +559,59 @@ extern "C"
 	{
 		if (module == nullptr)
 			return;
+
 		module->module.dump(print_method_bodies, print_attr_values, print_param_values);
+	}
+
+	void
+	cunder_module_load_allocated(const char *filename, void *module_void)
+	{
+		torch::jit::Module module;
+
+		try
+		{
+			module = torch::jit::load(filename);
+		} catch (const c10::Error &e)
+		{
+			printf("%s\n", e.msg().c_str());
+			printf("%s\n", e.what());
+			return;
+		}
+
+		Cunder_Module *cunder_module = (Cunder_Module *)module_void;
+		cunder_module->module = module;
+	}
+
+	void
+	cunder_module_dump_allocated(const void *module_void, bool print_method_bodies, bool print_attr_values, bool print_param_values)
+	{
+		Cunder_Module *module = (Cunder_Module *)module_void;
+		cunder_module_dump(module);
+	}
+
+	void
+	cunder_tensor_print_attrs(Cunder_Tensor *tensor)
+	{
+		int64_t ndim = tensor->tensor.dim();
+		printf("dim %d\n", ndim);
+		printf("sizes %d\n", tensor->tensor.sizes());
+		printf("dtype %d\n", tensor->tensor.dtype());
+		printf("cunder_type %d\n", cunder_tensor_type(tensor));
+		int64_t *out_shape = new int64_t[ndim];
+		cunder_tensor_shape(tensor, out_shape);
+		for (int64_t d = 0; d < ndim; ++d)
+			printf("%d ", out_shape[d]);
+		printf("\n");
+		delete[] out_shape;
+	}
+
+	void
+	cunder_tensor_print_attrs_allocated(void *tensor_void)
+	{
+		Cunder_Tensor *tensor = (Cunder_Tensor *)tensor_void;
+		if (tensor->tensor.getIntrusivePtr() == nullptr)
+			tensor->tensor.unsafeReleaseTensorImpl();
+		cunder_tensor_print_attrs(tensor);
 	}
 
 } // extern "C"

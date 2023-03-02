@@ -1,22 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
 
-add_library(cunder SHARED
-c_libtorch.h
-c_libtorch.cpp
-)
+add_library(cunder SHARED c_libtorch.h c_libtorch.cpp)
 
 # for dllexport on WIN32
 target_compile_definitions(cunder PRIVATE "CUNDER_COMPILE_LIBRARY")
 
-target_link_libraries(cunder
-    PUBLIC
-    "${TORCH_LIBRARIES}"
-)
-message(STATUS "${TORCH_LIBRARIES}")
-
-target_compile_options(cunder
-    PRIVATE -Wall -pedantic -fno-omit-frame-pointer -O3
-)
+target_link_libraries(cunder PUBLIC "${TORCH_LIBRARIES}")
 
 if(WIN32)
     # The following code block is suggested to be used on Windows.
@@ -29,4 +18,3 @@ if(WIN32)
         ${TORCH_DLLS}
         ${CMAKE_BINARY_DIR}/bin/$<CONFIG>)
 endif()
-

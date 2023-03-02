@@ -26,19 +26,15 @@ extern "C"
 #define CUNDER_EXPORT __attribute__((visibility("default")))
 #endif // defined(_WIN32)
 #endif // CUNDER_EXPORT
-#
 
 #ifndef CUNDER_DEPRECATED
 #define CUNDER_DEPRECATED __declspec(deprecated)
 #endif // CUNDER_DEPRECATED
-#
 
 #ifndef CUNDER_DEPRECATED_EXPORT
 #define CUNDER_DEPRECATED_EXPORT CUNDER_EXPORT CUNDER_DEPRECATED
 #endif // CUNDER_DEPRECATED_EXPORT
 #endif // CUNDER_STATIC_DEFINE
-
-	// definitions
 
 	// data
 	typedef struct
@@ -65,8 +61,21 @@ extern "C"
 	typedef struct Cunder_Module Cunder_Module;
 
 	// API
+
+	CUNDER_EXPORT void
+	cunder_get_tensor_size_alignment(int64_t &size, int64_t &alignment);
+
+	CUNDER_EXPORT void
+	cunder_get_module_size_alignment(int64_t &size, int64_t &alignment);
+
 	CUNDER_EXPORT Torch_Version
 	cunder_torch_version();
+
+	CUNDER_EXPORT Cunder_Tensor *
+	cunder_tensor_clone(Cunder_Tensor *src);
+
+	CUNDER_EXPORT void
+	cunder_tensor_clone_allocated(void *out_void, void *src_void);
 
 	// Delete objects.
 	CUNDER_EXPORT int
@@ -74,6 +83,12 @@ extern "C"
 
 	CUNDER_EXPORT int
 	cunder_module_free(Cunder_Module *self);
+
+	CUNDER_EXPORT int
+	cunder_tensor_free_allocated(void *self_void);
+
+	CUNDER_EXPORT int
+	cunder_module_free_allocated(void *self_void);
 
 	// Initialize tensor without data
 	CUNDER_EXPORT Cunder_Tensor *
@@ -88,6 +103,18 @@ extern "C"
 	CUNDER_EXPORT Cunder_Tensor *
 	cunder_tensor_range(int start, int end, int step, Cunder_DType dtype);
 
+	CUNDER_EXPORT void
+	cunder_tensor_ones_allocated(void *tensor_void, int ndim, const int *shape, Cunder_DType dtype);
+
+	CUNDER_EXPORT void
+	cunder_tensor_zeros_allocated(void *tensor_void, int ndim, const int *shape, Cunder_DType dtype);
+
+	CUNDER_EXPORT void
+	cunder_tensor_eye_allocated(void *tensor_void, int n, Cunder_DType dtype);
+
+	CUNDER_EXPORT void
+	cunder_tensor_range_allocated(void *tensor_void, int start, int end, int step, Cunder_DType dtype);
+
 	// Initialize tensor with data
 
 	CUNDER_EXPORT Cunder_Tensor *
@@ -96,15 +123,27 @@ extern "C"
 	CUNDER_EXPORT Cunder_Tensor *
 	cunder_tensor_from_data(int ndim, const int *shape, void *data, Cunder_DType dtype, void (*free)(void *));
 
+	CUNDER_EXPORT void
+	cunder_tensor_from_data_wrap_allocated(void *tensor_void, int ndim, const int *shape, void *data, Cunder_DType dtype);
+
+	CUNDER_EXPORT void
+	cunder_tensor_from_data_allocated(void *tensor_void, int ndim, const int *shape, void *data, Cunder_DType dtype, void (*free)(void *));
+
 	// Tensor to()
 
 	CUNDER_EXPORT void
 	cunder_tensor_to(Cunder_Tensor *tensor, Cunder_DType dtype);
 
+	CUNDER_EXPORT void
+	cunder_tensor_to_allocated(void *tensor_void, Cunder_DType dtype);
+
 	// Tensor print()
 
 	CUNDER_EXPORT void
 	cunder_tensor_print(const Cunder_Tensor *tensor);
+
+	CUNDER_EXPORT void
+	cunder_tensor_print_allocated(const void *tensor_void);
 
 	// Tensor info
 
@@ -113,11 +152,22 @@ extern "C"
 	CUNDER_EXPORT int64_t
 	cunder_tensor_ndim(const Cunder_Tensor *tensor);
 	CUNDER_EXPORT void
-	cunder_tensor_shape(const Cunder_Tensor *tensor, int64_t ndim, int64_t *out_shape);
+	cunder_tensor_shape(const Cunder_Tensor *tensor, int64_t *out_shape);
 	CUNDER_EXPORT int64_t
 	cunder_tensor_numel(const Cunder_Tensor *tensor);
 	CUNDER_EXPORT int64_t
 	cunder_tensor_dim_size(const Cunder_Tensor *tensor, int64_t dim);
+
+	CUNDER_EXPORT Cunder_DType
+	cunder_tensor_type_allocated(const void *tensor_void);
+	CUNDER_EXPORT int64_t
+	cunder_tensor_ndim_allocated(const void *tensor_void);
+	CUNDER_EXPORT void
+	cunder_tensor_shape_allocated(const void *tensor_void, int64_t *out_shape);
+	CUNDER_EXPORT int64_t
+	cunder_tensor_numel_allocated(const void *tensor_void);
+	CUNDER_EXPORT int64_t
+	cunder_tensor_dim_size_allocated(const void *tensor_void, int64_t dim);
 
 	// tensor accessors
 
@@ -145,6 +195,12 @@ extern "C"
 	CUNDER_EXPORT void
 	cunder_module_dump(
 		const Cunder_Module *module, bool print_method_bodies = false, bool print_attr_values = false, bool print_param_values = false);
+
+	CUNDER_EXPORT void
+	cunder_tensor_print_attrs(Cunder_Tensor *tensor);
+
+	CUNDER_EXPORT void
+	cunder_tensor_print_attrs_allocated(void *tensor_void);
 
 #ifdef __cplusplus
 }
