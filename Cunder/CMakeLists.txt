@@ -7,10 +7,6 @@ target_compile_definitions(cunder PRIVATE "CUNDER_COMPILE_LIBRARY")
 
 target_link_libraries(cunder PUBLIC "${TORCH_LIBRARIES}")
 
-target_compile_options(cunder
-    PRIVATE -Wall -pedantic -fno-omit-frame-pointer -O3
-)
-
 if(WIN32)
     # The following code block is suggested to be used on Windows.
     # According to https://github.com/pytorch/pytorch/issues/25457,
