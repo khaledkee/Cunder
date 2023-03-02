@@ -10,6 +10,7 @@ see `playground/main.cpp`
 
 ```cpp
 #include <cunder/c_libtorch.h>
+#include <iostream>
 
 int main()
 {
@@ -21,17 +22,18 @@ int main()
 	// print the tensor
 	printf("Cunder Tensor external data: \n");
 	cunder_tensor_print(cunder_data_tensor);
+	cunder_tensor_print_attrs(cunder_data_tensor);
 
 	// access tensor data
 	auto *tensor_accessor = cunder_tensor_accessor_f32(cunder_data_tensor);
 	for (size_t i = 0; i < 3; i++)
-		std::cout << tensor_accessor[i] << ",\n"[i == 2];
+		std::cout << tensor_accessor[i] << ',';
+	std::cout << std::endl;
 
 	// free the tensor
 	cunder_tensor_free(cunder_data_tensor);
 	return 0;
 }
-
 ```
 
 # Structure
@@ -41,12 +43,11 @@ NOTE: add LibTorch dlls and include files in external folder OR use CMake find(t
 # Roadmap
 
 - [x] `torch::version()`
-- [ ] Create tensor from data
+- [x] Create tensor from data
   - [x] given shape create zero tensor
-  - [ ] given some data (pointer) with shape create tensor
+  - [x] given some data (pointer) with shape create tensor
     - [x] wrapping the data
-    - [ ] cloning the data
-      - [ ] Memory allocation for new tensor data
+    - [x] cloning the data
   - Supported types:
     - [x] bool
     - [x] uint8
@@ -57,8 +58,8 @@ NOTE: add LibTorch dlls and include files in external folder OR use CMake find(t
     - [x] float64
   - [x] access tensor data
 - [ ] Torch script jit model
-  - [ ] Module struct `torch::jit::Module`
-  - [ ] load Module `torch::jit::load()`
+  - [x] Module struct `torch::jit::Module`
+  - [x] load Module `torch::jit::load()`
   - [ ] call `eval()` on Module
   - [ ] run Module on cpu (call `forward()` with tensors)
 - [ ] Add support to external libraries:
