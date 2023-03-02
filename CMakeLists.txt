@@ -21,7 +21,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # TODO: don't use absolute path
 IF(CMAKE_BUILD_TYPE MATCHES "Debug")
     set(LIBTORCH_PATH "D:/Libtorch/Original/libtorch-win-shared-with-deps-debug-1.13.1+cpu/libtorch")
-ELSE(CMAKE_BUILD_TYPE MATCHES "Release")
+ELSE()
     set(LIBTORCH_PATH "D:/Libtorch/Original/libtorch-win-shared-with-deps-1.13.1+cpu/libtorch")
 ENDIF()
 find_package(Torch REQUIRED PATHS "${LIBTORCH_PATH}" NO_DEFAULT_PATH)
