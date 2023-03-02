@@ -22,7 +22,7 @@ int main()
 	// print the tensor
 	printf("Cunder Tensor external data: \n");
 	cunder_tensor_print(cunder_data_tensor);
-	cunder_tensor_print_attrs(cunder_data_tensor);
+	cunder_tensor_print_attributes(cunder_data_tensor);
 
 	// access tensor data
 	auto *tensor_accessor = cunder_tensor_accessor_f32(cunder_data_tensor);

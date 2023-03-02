@@ -69,54 +69,54 @@ main(int argc, char *argv[])
 
 	// cunder_module
 	Cunder_Module *cunder_module = cunder_module_load("D:\\model.pt");
-	cunder_module_dump(cunder_module);
+	cunder_module_dump(cunder_module, false, false, false);
 	cunder_module_free(cunder_module);
 
 	int64_t size, alignment;
 	cunder_get_tensor_size_alignment(size, alignment);
 
-	void *allocated_cunder_zeros_tensor = _aligned_malloc(size, alignment);
+	Cunder_Tensor *allocated_cunder_zeros_tensor = (Cunder_Tensor*)_aligned_malloc(size, alignment);
 	memset(allocated_cunder_zeros_tensor, 0, size);
-	cunder_tensor_zeros_allocated(allocated_cunder_zeros_tensor, 1, tensor_data_shape, Cunder_DType::Cunder_Float32);
-	cunder_tensor_print_attrs_allocated(allocated_cunder_zeros_tensor);
-	cunder_tensor_print_allocated(allocated_cunder_zeros_tensor);
-	cunder_tensor_free_allocated(allocated_cunder_zeros_tensor);
+	cunder_tensor_zeros_allocated(allocated_cunder_zeros_tensor, 2, zeros_shape, Cunder_DType::Cunder_Float32);
+	cunder_tensor_print_attributes(allocated_cunder_zeros_tensor);
+	cunder_tensor_print(allocated_cunder_zeros_tensor);
+	_aligned_free(allocated_cunder_zeros_tensor);
 
-	void *allocated_cunder_ones_tensor = _aligned_malloc(size, alignment);
+	Cunder_Tensor *allocated_cunder_ones_tensor = (Cunder_Tensor*)_aligned_malloc(size, alignment);
 	memset(allocated_cunder_ones_tensor, 0, size);
-	cunder_tensor_ones_allocated(allocated_cunder_ones_tensor, 1, tensor_data_shape, Cunder_DType::Cunder_Float32);
-	cunder_tensor_print_attrs_allocated(allocated_cunder_ones_tensor);
-	cunder_tensor_print_allocated(allocated_cunder_ones_tensor);
-	cunder_tensor_free_allocated(allocated_cunder_ones_tensor);
+	cunder_tensor_ones_allocated(allocated_cunder_ones_tensor, 3, ones_shape, Cunder_DType::Cunder_Float32);
+	cunder_tensor_print_attributes(allocated_cunder_ones_tensor);
+	cunder_tensor_print(allocated_cunder_ones_tensor);
+	_aligned_free(allocated_cunder_ones_tensor);
 
-	void *allocated_cunder_eye_tensor = _aligned_malloc(size, alignment);
+	Cunder_Tensor *allocated_cunder_eye_tensor = (Cunder_Tensor*)_aligned_malloc(size, alignment);
 	memset(allocated_cunder_eye_tensor, 0, size);
-	cunder_tensor_eye_allocated(allocated_cunder_eye_tensor, 1, Cunder_DType::Cunder_Float32);
-	cunder_tensor_print_attrs_allocated(allocated_cunder_eye_tensor);
-	cunder_tensor_print_allocated(allocated_cunder_eye_tensor);
-	cunder_tensor_free_allocated(allocated_cunder_eye_tensor);
+	cunder_tensor_eye_allocated(allocated_cunder_eye_tensor, 3, Cunder_DType::Cunder_Float32);
+	cunder_tensor_print_attributes(allocated_cunder_eye_tensor);
+	cunder_tensor_print(allocated_cunder_eye_tensor);
+	_aligned_free(allocated_cunder_eye_tensor);
 
-	void *allocated_cunder_range_tensor = _aligned_malloc(size, alignment);
+	Cunder_Tensor *allocated_cunder_range_tensor = (Cunder_Tensor*)_aligned_malloc(size, alignment);
 	memset(allocated_cunder_range_tensor, 0, size);
 	cunder_tensor_range_allocated(allocated_cunder_range_tensor, 1, 9, 1, Cunder_DType::Cunder_Float32);
-	cunder_tensor_print_attrs_allocated(allocated_cunder_range_tensor);
-	cunder_tensor_print_allocated(allocated_cunder_range_tensor);
-	cunder_tensor_free_allocated(allocated_cunder_range_tensor);
+	cunder_tensor_print_attributes(allocated_cunder_range_tensor);
+	cunder_tensor_print(allocated_cunder_range_tensor);
+	_aligned_free(allocated_cunder_range_tensor);
 
-	void *allocated_cunder_data_tensor = _aligned_malloc(size, alignment);
+	Cunder_Tensor *allocated_cunder_data_tensor = (Cunder_Tensor*)_aligned_malloc(size, alignment);
 	memset(allocated_cunder_data_tensor, 0, size);
 	cunder_tensor_from_data_allocated(
 		allocated_cunder_data_tensor, 1, tensor_data_shape, tensor_data, Cunder_DType::Cunder_Float32, nullptr);
-	cunder_tensor_print_attrs_allocated(allocated_cunder_data_tensor);
-	cunder_tensor_print_allocated(allocated_cunder_data_tensor);
+	cunder_tensor_print_attributes(allocated_cunder_data_tensor);
+	cunder_tensor_print(allocated_cunder_data_tensor);
 
-	void *allocated_cunder_data_tensor_clone = _aligned_malloc(size, alignment);
+	Cunder_Tensor *allocated_cunder_data_tensor_clone = (Cunder_Tensor*)_aligned_malloc(size, alignment);
 	memset(allocated_cunder_data_tensor_clone, 0, size);
 	cunder_tensor_clone_allocated(allocated_cunder_data_tensor_clone, allocated_cunder_data_tensor);
-	cunder_tensor_print_attrs_allocated(allocated_cunder_data_tensor_clone);
-	cunder_tensor_print_allocated(allocated_cunder_data_tensor_clone);
-	cunder_tensor_free_allocated(allocated_cunder_data_tensor_clone);
-	cunder_tensor_free_allocated(allocated_cunder_data_tensor);
+	cunder_tensor_print_attributes(allocated_cunder_data_tensor_clone);
+	cunder_tensor_print(allocated_cunder_data_tensor_clone);
+	_aligned_free(allocated_cunder_data_tensor_clone);
+	_aligned_free(allocated_cunder_data_tensor);
 
 	return 0;
 }

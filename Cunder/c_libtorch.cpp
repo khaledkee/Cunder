@@ -198,32 +198,6 @@ extern "C"
 		return 0; // success
 	}
 
-	int
-	cunder_tensor_free_allocated(void *self_void)
-	{
-		Cunder_Tensor *self = (Cunder_Tensor *)self_void;
-		if (self == nullptr)
-			return -1;
-
-		self->tensor.~Tensor();
-		_aligned_free(self);
-
-		return 0; // success
-	}
-
-	int
-	cunder_module_free_allocated(void *self_void)
-	{
-		Cunder_Module *self = (Cunder_Module *)self_void;
-		if (self == nullptr)
-			return -1;
-
-		self->module.~Module();
-		_aligned_free(self);
-
-		return 0; // success
-	}
-
 	inline static bool
 	_cunder_check_initialization_param(int ndim, const int *shape, Cunder_DType dtype)
 	{
@@ -279,13 +253,12 @@ extern "C"
 	}
 
 	void
-	cunder_tensor_ones_allocated(void *tensor_void, int ndim, const int *shape, Cunder_DType dtype)
+	cunder_tensor_ones_allocated(Cunder_Tensor *tensor, int ndim, const int *shape, Cunder_DType dtype)
 	{
 		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
 			return;
 
 		std::vector<int64_t> vshape(shape, shape + ndim);
-		Cunder_Tensor *tensor = (Cunder_Tensor *)tensor_void;
 
 		if (tensor->tensor.getIntrusivePtr() == nullptr)
 			tensor->tensor.unsafeReleaseTensorImpl();
@@ -293,13 +266,12 @@ extern "C"
 	}
 
 	void
-	cunder_tensor_zeros_allocated(void *tensor_void, int ndim, const int *shape, Cunder_DType dtype)
+	cunder_tensor_zeros_allocated(Cunder_Tensor *tensor, int ndim, const int *shape, Cunder_DType dtype)
 	{
 		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
 			return;
 
 		std::vector<int64_t> vshape(shape, shape + ndim);
-		Cunder_Tensor *tensor = (Cunder_Tensor *)tensor_void;
 
 		if (tensor->tensor.getIntrusivePtr() == nullptr)
 			tensor->tensor.unsafeReleaseTensorImpl();
@@ -307,24 +279,22 @@ extern "C"
 	}
 
 	void
-	cunder_tensor_eye_allocated(void *tensor_void, int n, Cunder_DType dtype)
+	cunder_tensor_eye_allocated(Cunder_Tensor *tensor, int n, Cunder_DType dtype)
 	{
 		if (cunder::is_valid_dtype(dtype) == false)
 			return;
 
-		Cunder_Tensor *tensor = (Cunder_Tensor *)tensor_void;
 		if (tensor->tensor.getIntrusivePtr() == nullptr)
 			tensor->tensor.unsafeReleaseTensorImpl();
 		tensor->tensor = torch::eye(n, cunder::get_libtorch_dtype(dtype));
 	}
 
 	void
-	cunder_tensor_range_allocated(void *tensor_void, int start, int end, int step, Cunder_DType dtype)
+	cunder_tensor_range_allocated(Cunder_Tensor *tensor, int start, int end, int step, Cunder_DType dtype)
 	{
 		if (cunder::is_valid_dtype(dtype) == false)
 			return;
 
-		Cunder_Tensor *tensor = (Cunder_Tensor *)tensor_void;
 		if (tensor->tensor.getIntrusivePtr() == nullptr)
 			tensor->tensor.unsafeReleaseTensorImpl();
 		tensor->tensor = torch::range(start, end, step, cunder::get_libtorch_dtype(dtype));
@@ -355,13 +325,12 @@ extern "C"
 	}
 
 	void
-	cunder_tensor_from_data_wrap_allocated(void *tensor_void, int ndim, const int *shape, void *data, Cunder_DType dtype)
+	cunder_tensor_from_data_wrap_allocated(Cunder_Tensor *tensor, int ndim, const int *shape, void *data, Cunder_DType dtype)
 	{
 		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
 			return;
 
 		std::vector<int64_t> vshape(shape, shape + ndim);
-		Cunder_Tensor *tensor = (Cunder_Tensor *)tensor_void;
 
 		if (tensor->tensor.getIntrusivePtr() == nullptr)
 			tensor->tensor.unsafeReleaseTensorImpl();
@@ -369,13 +338,12 @@ extern "C"
 	}
 
 	void
-	cunder_tensor_from_data_allocated(void *tensor_void, int ndim, const int *shape, void *data, Cunder_DType dtype, void (*free)(void *))
+	cunder_tensor_from_data_allocated(Cunder_Tensor *tensor, int ndim, const int *shape, void *data, Cunder_DType dtype, void (*free)(void *))
 	{
 		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
 			return;
 
 		std::vector<int64_t> vshape(shape, shape + ndim);
-		Cunder_Tensor *tensor = (Cunder_Tensor *)tensor_void;
 
 		if (tensor->tensor.getIntrusivePtr() == nullptr)
 			tensor->tensor.unsafeReleaseTensorImpl();
@@ -392,31 +360,12 @@ extern "C"
 	}
 
 	void
-	cunder_tensor_to_allocated(void *tensor_void, Cunder_DType dtype)
-	{
-		Cunder_Tensor *tensor = (Cunder_Tensor *)tensor_void;
-		if (tensor == nullptr)
-			return;
-
-		if (tensor->tensor.getIntrusivePtr() == nullptr)
-			tensor->tensor.unsafeReleaseTensorImpl();
-		tensor->tensor = tensor->tensor.toType(cunder::get_libtorch_dtype(dtype));
-	}
-
-	void
 	cunder_tensor_print(const Cunder_Tensor *tensor)
 	{
 		if (tensor == nullptr)
 			return;
 		print(tensor->tensor);
 		printf("\n");
-	}
-
-	void
-	cunder_tensor_print_allocated(const void *tensor_void)
-	{
-		auto tensor = (Cunder_Tensor *)tensor_void;
-		cunder_tensor_print(tensor);
 	}
 
 	Cunder_DType
@@ -449,41 +398,6 @@ extern "C"
 	cunder_tensor_dim_size(const Cunder_Tensor *tensor, int64_t dim)
 	{
 		return tensor->tensor.size(dim);
-	}
-
-	Cunder_DType
-	cunder_tensor_type_allocated(const void *tensor_void)
-	{
-		auto tensor = (Cunder_Tensor *)tensor_void;
-		return cunder_tensor_type(tensor);
-	}
-
-	int64_t
-	cunder_tensor_ndim_allocated(const void *tensor_void)
-	{
-		auto tensor = (Cunder_Tensor *)tensor_void;
-		return cunder_tensor_ndim(tensor);
-	}
-
-	void
-	cunder_tensor_shape_allocated(const void *tensor_void, int64_t *out_shape)
-	{
-		auto tensor = (Cunder_Tensor *)tensor_void;
-		cunder_tensor_shape(tensor, out_shape);
-	}
-
-	int64_t
-	cunder_tensor_numel_allocated(const void *tensor_void)
-	{
-		auto tensor = (Cunder_Tensor *)tensor_void;
-		return cunder_tensor_numel(tensor);
-	}
-
-	int64_t
-	cunder_tensor_dim_size_allocated(const void *tensor_void, int64_t dim)
-	{
-		auto tensor = (Cunder_Tensor *)tensor_void;
-		return cunder_tensor_dim_size(tensor, dim);
 	}
 
 	const bool *
@@ -583,35 +497,19 @@ extern "C"
 	}
 
 	void
-	cunder_module_dump_allocated(const void *module_void, bool print_method_bodies, bool print_attr_values, bool print_param_values)
-	{
-		Cunder_Module *module = (Cunder_Module *)module_void;
-		cunder_module_dump(module);
-	}
-
-	void
-	cunder_tensor_print_attrs(Cunder_Tensor *tensor)
+	cunder_tensor_print_attributes(Cunder_Tensor *tensor)
 	{
 		int64_t ndim = tensor->tensor.dim();
-		printf("dim %d\n", ndim);
-		printf("sizes %d\n", tensor->tensor.sizes());
-		printf("dtype %d\n", tensor->tensor.dtype());
+		printf("dim %lld\n", ndim);
+		printf("dtype %s\n", tensor->tensor.dtype().name().data());
 		printf("cunder_type %d\n", cunder_tensor_type(tensor));
 		int64_t *out_shape = new int64_t[ndim];
 		cunder_tensor_shape(tensor, out_shape);
+		printf("sizes ");
 		for (int64_t d = 0; d < ndim; ++d)
-			printf("%d ", out_shape[d]);
+			printf("%lld ", out_shape[d]);
 		printf("\n");
 		delete[] out_shape;
-	}
-
-	void
-	cunder_tensor_print_attrs_allocated(void *tensor_void)
-	{
-		Cunder_Tensor *tensor = (Cunder_Tensor *)tensor_void;
-		if (tensor->tensor.getIntrusivePtr() == nullptr)
-			tensor->tensor.unsafeReleaseTensorImpl();
-		cunder_tensor_print_attrs(tensor);
 	}
 
 } // extern "C"
