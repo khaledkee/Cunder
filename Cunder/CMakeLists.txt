@@ -5,7 +5,7 @@ add_library(cunder SHARED c_libtorch.h c_libtorch.cpp)
 # for dllexport on WIN32
 target_compile_definitions(cunder PRIVATE "CUNDER_COMPILE_LIBRARY")
 
-target_link_libraries(cunder PUBLIC "${TORCH_LIBRARIES}")
+target_link_libraries(cunder PRIVATE "${TORCH_LIBRARIES}")
 
 if(WIN32)
     # The following code block is suggested to be used on Windows.

@@ -1,5 +1,6 @@
 #include <torch/all.h>
 #include <torch/script.h>
+#include <c10/core/alignment.h>
 #include "c_libtorch.h"
 
 namespace cunder
@@ -130,18 +131,48 @@ extern "C"
 		torch::jit::Module module;
 	};
 
-	void
-	cunder_get_tensor_size_alignment(int64_t &size, int64_t &alignment)
+	struct Cunder_Allocator final : at::Allocator
 	{
-		size = sizeof(Cunder_Tensor);
-		alignment = alignof(Cunder_Tensor);
+		std::function<void *(size_t, uint8_t)> aligned_allocator;
+		at::DeleterFnPtr deleter;
+
+		Cunder_Allocator() {}
+		~Cunder_Allocator() override {}
+
+		Cunder_Allocator(void *(*allocate)(size_t, uint8_t), void (*deallocate)(void *))
+		{
+			aligned_allocator = allocate;
+			deleter = deallocate;
+		}
+
+		at::DataPtr
+		allocate(size_t nbytes) const override
+		{
+			if (nbytes <= 0)
+				return {nullptr, nullptr, deleter, at::Device(at::DeviceType::CPU)};
+			void *data = aligned_allocator(nbytes, c10::gAlignment);
+			return {data, data, deleter, at::Device(at::DeviceType::CPU)};
+		}
+		at::DeleterFnPtr
+		raw_deleter() const override
+		{
+			return deleter;
+		}
+	};
+
+	Cunder_Allocator *
+	cunder_set_cpu_allocator(void *(*allocate)(size_t, uint8_t), void (*deallocate)(void *))
+	{
+		auto allocator = (Cunder_Allocator *)allocate(sizeof(Cunder_Allocator), alignof(Cunder_Allocator));
+		::new (allocator) Cunder_Allocator(std::forward<void*(*)(size_t, uint8_t)>(allocate), std::forward<c10::DeleterFnPtr>(deallocate));
+		torch::SetAllocator(c10::DeviceType::CPU, allocator);
+		return allocator;
 	}
 
 	void
-	cunder_get_module_size_alignment(int64_t &size, int64_t &alignment)
+	cunder_allocator_free(Cunder_Allocator * allocator)
 	{
-		size = sizeof(Cunder_Module);
-		alignment = alignof(Cunder_Module);
+		allocator->raw_deallocate(allocator);
 	}
 
 	Torch_Version
@@ -252,54 +283,6 @@ extern "C"
 		return tensor;
 	}
 
-	void
-	cunder_tensor_ones_allocated(Cunder_Tensor *tensor, int ndim, const int *shape, Cunder_DType dtype)
-	{
-		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
-			return;
-
-		std::vector<int64_t> vshape(shape, shape + ndim);
-
-		if (tensor->tensor.getIntrusivePtr() == nullptr)
-			tensor->tensor.unsafeReleaseTensorImpl();
-		tensor->tensor = torch::ones(vshape, cunder::get_libtorch_dtype(dtype));
-	}
-
-	void
-	cunder_tensor_zeros_allocated(Cunder_Tensor *tensor, int ndim, const int *shape, Cunder_DType dtype)
-	{
-		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
-			return;
-
-		std::vector<int64_t> vshape(shape, shape + ndim);
-
-		if (tensor->tensor.getIntrusivePtr() == nullptr)
-			tensor->tensor.unsafeReleaseTensorImpl();
-		tensor->tensor = torch::zeros(vshape, cunder::get_libtorch_dtype(dtype));
-	}
-
-	void
-	cunder_tensor_eye_allocated(Cunder_Tensor *tensor, int n, Cunder_DType dtype)
-	{
-		if (cunder::is_valid_dtype(dtype) == false)
-			return;
-
-		if (tensor->tensor.getIntrusivePtr() == nullptr)
-			tensor->tensor.unsafeReleaseTensorImpl();
-		tensor->tensor = torch::eye(n, cunder::get_libtorch_dtype(dtype));
-	}
-
-	void
-	cunder_tensor_range_allocated(Cunder_Tensor *tensor, int start, int end, int step, Cunder_DType dtype)
-	{
-		if (cunder::is_valid_dtype(dtype) == false)
-			return;
-
-		if (tensor->tensor.getIntrusivePtr() == nullptr)
-			tensor->tensor.unsafeReleaseTensorImpl();
-		tensor->tensor = torch::range(start, end, step, cunder::get_libtorch_dtype(dtype));
-	}
-
 	Cunder_Tensor *
 	cunder_tensor_from_data_wrap(int ndim, const int *shape, void *data, Cunder_DType dtype)
 	{
@@ -322,32 +305,6 @@ extern "C"
 		std::vector<int64_t> vshape(shape, shape + ndim);
 		tensor->tensor = torch::from_blob(data, vshape, free, torch::TensorOptions(cunder::get_libtorch_dtype(dtype)));
 		return tensor;
-	}
-
-	void
-	cunder_tensor_from_data_wrap_allocated(Cunder_Tensor *tensor, int ndim, const int *shape, void *data, Cunder_DType dtype)
-	{
-		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
-			return;
-
-		std::vector<int64_t> vshape(shape, shape + ndim);
-
-		if (tensor->tensor.getIntrusivePtr() == nullptr)
-			tensor->tensor.unsafeReleaseTensorImpl();
-		tensor->tensor = torch::from_blob(data, vshape, torch::TensorOptions(cunder::get_libtorch_dtype(dtype)));
-	}
-
-	void
-	cunder_tensor_from_data_allocated(Cunder_Tensor *tensor, int ndim, const int *shape, void *data, Cunder_DType dtype, void (*free)(void *))
-	{
-		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
-			return;
-
-		std::vector<int64_t> vshape(shape, shape + ndim);
-
-		if (tensor->tensor.getIntrusivePtr() == nullptr)
-			tensor->tensor.unsafeReleaseTensorImpl();
-		tensor->tensor = torch::from_blob(data, vshape, free, torch::TensorOptions(cunder::get_libtorch_dtype(dtype)));
 	}
 
 	void
@@ -478,31 +435,11 @@ extern "C"
 	}
 
 	void
-	cunder_module_load_allocated(const char *filename, void *module_void)
-	{
-		torch::jit::Module module;
-
-		try
-		{
-			module = torch::jit::load(filename);
-		} catch (const c10::Error &e)
-		{
-			printf("%s\n", e.msg().c_str());
-			printf("%s\n", e.what());
-			return;
-		}
-
-		Cunder_Module *cunder_module = (Cunder_Module *)module_void;
-		cunder_module->module = module;
-	}
-
-	void
 	cunder_tensor_print_attributes(Cunder_Tensor *tensor)
 	{
 		int64_t ndim = tensor->tensor.dim();
 		printf("dim %lld\n", ndim);
-		printf("dtype %s\n", tensor->tensor.dtype().name().data());
-		printf("cunder_type %d\n", cunder_tensor_type(tensor));
+		printf("dtype %.*s\n", (int)tensor->tensor.dtype().name().length(), tensor->tensor.dtype().name().data());
 		int64_t *out_shape = new int64_t[ndim];
 		cunder_tensor_shape(tensor, out_shape);
 		printf("sizes ");
