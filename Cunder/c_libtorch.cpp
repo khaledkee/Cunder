@@ -151,13 +151,28 @@ extern "C"
 	}
 
 	Cunder_Tensor *
+	cunder_tensor_allocate(size_t tensors_count)
+	{
+		Cunder_Tensor *tensors = (Cunder_Tensor *)malloc(sizeof(Cunder_Tensor) * tensors_count);
+		for (size_t i = 0; i < tensors_count; ++i)
+			::new (&tensors[i]) Cunder_Tensor{torch::Tensor()};
+		return tensors;
+	}
+
+	void
+	cunder_tensor_array_set(Cunder_Tensor *tensors_array, size_t i, Cunder_Tensor *tensor)
+	{
+		tensors_array[i].tensor.~Tensor();
+		tensors_array[i] = *tensor;
+	}
+
+	Cunder_Tensor *
 	cunder_tensor_clone(Cunder_Tensor *src)
 	{
 		if (src == nullptr)
 			return nullptr;
 
-		auto out = new Cunder_Tensor{};
-		out->tensor = src->tensor.clone();
+		auto out = new Cunder_Tensor{src->tensor.clone()};
 		return out;
 	}
 
@@ -211,10 +226,9 @@ extern "C"
 	{
 		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
 			return nullptr;
-		Cunder_Tensor *tensor = new Cunder_Tensor{};
 
 		std::vector<int64_t> vshape(shape, shape + ndim);
-		tensor->tensor = torch::ones(vshape, cunder::get_libtorch_dtype(dtype));
+		Cunder_Tensor *tensor = new Cunder_Tensor{torch::ones(vshape, cunder::get_libtorch_dtype(dtype))};
 		return tensor;
 	}
 
@@ -223,10 +237,9 @@ extern "C"
 	{
 		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
 			return nullptr;
-		Cunder_Tensor *tensor = new Cunder_Tensor{};
 
 		std::vector<int64_t> vshape(shape, shape + ndim);
-		tensor->tensor = torch::zeros(vshape, cunder::get_libtorch_dtype(dtype));
+		Cunder_Tensor *tensor = new Cunder_Tensor{torch::zeros(vshape, cunder::get_libtorch_dtype(dtype))};
 		return tensor;
 	}
 
@@ -236,8 +249,7 @@ extern "C"
 		if (cunder::is_valid_dtype(dtype) == false)
 			return nullptr;
 
-		auto *tensor = new Cunder_Tensor();
-		tensor->tensor = torch::eye(n, cunder::get_libtorch_dtype(dtype));
+		auto *tensor = new Cunder_Tensor{torch::eye(n, cunder::get_libtorch_dtype(dtype))};
 		return tensor;
 	}
 
@@ -247,8 +259,7 @@ extern "C"
 		if (cunder::is_valid_dtype(dtype) == false)
 			return nullptr;
 
-		auto *tensor = new Cunder_Tensor();
-		tensor->tensor = torch::range(start, end, step, cunder::get_libtorch_dtype(dtype));
+		auto *tensor = new Cunder_Tensor{torch::range(start, end, step, cunder::get_libtorch_dtype(dtype))};
 		return tensor;
 	}
 
@@ -338,7 +349,8 @@ extern "C"
 	}
 
 	void
-	cunder_tensor_from_data_allocated(Cunder_Tensor *tensor, int ndim, const int *shape, void *data, Cunder_DType dtype, void (*free)(void *))
+	cunder_tensor_from_data_allocated(
+		Cunder_Tensor *tensor, int ndim, const int *shape, void *data, Cunder_DType dtype, void (*free)(void *))
 	{
 		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
 			return;
@@ -463,8 +475,7 @@ extern "C"
 			return nullptr;
 		}
 
-		Cunder_Module *cunder_module = new Cunder_Module();
-		cunder_module->module = module;
+		Cunder_Module *cunder_module = new Cunder_Module{module};
 		return cunder_module;
 	}
 
@@ -475,6 +486,60 @@ extern "C"
 			return;
 
 		module->module.dump(print_method_bodies, print_attr_values, print_param_values);
+	}
+
+	void
+	cunder_module_eval(Cunder_Module *cunder_module)
+	{
+		cunder_module->module.eval();
+	}
+
+	size_t
+	cunder_module_input_num(Cunder_Module *cunder_module)
+	{
+		auto args = cunder_module->module.get_method("forward").getArgumentNames();
+		std::cout << "args: \n";
+		for (auto arg : args)
+			std::cout << arg << '\n';
+		std::cout << '\n';
+		return cunder_module->module.get_method("forward").num_inputs() - 1; // remove self argument
+	}
+
+	Cunder_Tensor *
+	cunder_module_forward(Cunder_Module *cunder_module, size_t tensors_array_num, Cunder_Tensor *tensors_array, size_t &output_count)
+	{
+		std::vector<torch::IValue> values;
+		values.resize(tensors_array_num);
+		for (size_t i = 0; i < tensors_array_num; ++i)
+			values[i] = tensors_array[i].tensor;
+		auto output = cunder_module->module.forward(values);
+		if (output.isTensor())
+		{
+			output_count = 1;
+			auto output_tensor = (Cunder_Tensor *)malloc(sizeof(Cunder_Tensor));
+			::new (output_tensor) Cunder_Tensor{output.toTensor()};
+			return output_tensor;
+		}
+		else if (output.isTensorList())
+		{
+			auto output_tensor_list = output.toTensorList();
+			output_count = output_tensor_list.size();
+			auto output_tensors = (Cunder_Tensor *)malloc(sizeof(Cunder_Tensor) * output_count);
+			for (size_t i = 0; i < output_count; ++i)
+				::new (&output_tensors[i]) Cunder_Tensor{output_tensor_list[i]};
+			return output_tensors;
+		}
+		else if (output.isTuple() && output.toTuple()->elements().empty() == false && output.toTuple()->elements()[0].isTensor())
+		{
+			auto output_tensor_list = output.toTuple()->elements();
+			output_count = output_tensor_list.size();
+			auto output_tensors = (Cunder_Tensor *)malloc(sizeof(Cunder_Tensor) * output_count);
+			for (size_t i = 0; i < output_count; ++i)
+				::new (&output_tensors[i]) Cunder_Tensor{output_tensor_list[i].toTensor()};
+			return output_tensors;
+		}
+		AT_ASSERT(false, "The module return type is not supported, got kind: ", output.tagKind());
+		return nullptr;
 	}
 
 	void
