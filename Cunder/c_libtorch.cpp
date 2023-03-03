@@ -497,11 +497,6 @@ extern "C"
 	size_t
 	cunder_module_input_num(Cunder_Module *cunder_module)
 	{
-		auto args = cunder_module->module.get_method("forward").getArgumentNames();
-		std::cout << "args: \n";
-		for (auto arg : args)
-			std::cout << arg << '\n';
-		std::cout << '\n';
 		return cunder_module->module.get_method("forward").num_inputs() - 1; // remove self argument
 	}
 
