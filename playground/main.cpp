@@ -65,9 +65,7 @@ main(int argc, char *argv[])
 	// Create tensor from data
 	float tensor_data[] = {1, 9, 1, 3, 2, 5};
 	int tensor_data_shape[] = {/* batch */ 3, /* channel */ 2};
-	auto data_tensor = torch::from_blob(tensor_data, {3, 2});
 	auto cunder_data_tensor = cunder_tensor_from_data(2, tensor_data_shape, tensor_data, Cunder_DType::Cunder_Float32);
-	pretty_print("Tensor external data: ", data_tensor);
 	printf("Cunder Tensor external data: \n");
 	cunder_tensor_print(cunder_data_tensor);
 
@@ -80,7 +78,6 @@ main(int argc, char *argv[])
 	auto cunder_data_tensor_clone = cunder_tensor_clone(cunder_data_tensor);
 	printf("Cunder Tensor external data clone: \n");
 	cunder_tensor_print(cunder_data_tensor_clone);
-	cunder_tensor_free(cunder_data_tensor);
 	cunder_tensor_free(cunder_data_tensor_clone);
 
 	// cunder_module
@@ -120,7 +117,7 @@ main(int argc, char *argv[])
 	std::cout << "Module input count: " << cunder_module_input_num(cunder_module_2_3) << std::endl;
 
 	size_t output_count_2_3;
-	Cunder_Tensor * model_2_3_inputs = cunder_tensor_allocate(2);
+	Cunder_Tensor *model_2_3_inputs = cunder_tensor_allocate(2);
 	cunder_tensor_array_set(model_2_3_inputs, 0, cunder_data_tensor_2);
 	cunder_tensor_array_set(model_2_3_inputs, 1, cunder_data_tensor_3);
 	Cunder_Tensor *output_tensors_2_3 = cunder_module_forward(cunder_module_2_3, 2, model_2_3_inputs, output_count_2_3);

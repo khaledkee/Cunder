@@ -63,11 +63,11 @@ extern "C"
 
 	// API
 
-	CUNDER_EXPORT Cunder_Allocator*
-	cunder_set_cpu_allocator(void* (*allocate)(size_t, uint8_t), void (*deallocate)(void *));
+	CUNDER_EXPORT Cunder_Allocator *
+	cunder_set_cpu_allocator(void *(*allocate)(size_t, uint8_t), void (*deallocate)(void *));
 
 	CUNDER_EXPORT void
-	cunder_allocator_free(Cunder_Allocator * allocator);
+	cunder_allocator_free(Cunder_Allocator *allocator);
 
 	CUNDER_EXPORT Torch_Version
 	cunder_torch_version();
@@ -76,7 +76,7 @@ extern "C"
 	cunder_tensor_allocate(size_t tensors_count);
 
 	CUNDER_EXPORT void
-	cunder_tensor_array_set(Cunder_Tensor * tensors_array, size_t i, Cunder_Tensor * tensor);
+	cunder_tensor_array_set(Cunder_Tensor *tensors_array, size_t i, Cunder_Tensor *tensor);
 
 	CUNDER_EXPORT Cunder_Tensor *
 	cunder_tensor_clone(Cunder_Tensor *src);

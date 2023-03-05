@@ -164,13 +164,13 @@ extern "C"
 	cunder_set_cpu_allocator(void *(*allocate)(size_t, uint8_t), void (*deallocate)(void *))
 	{
 		auto allocator = (Cunder_Allocator *)malloc(sizeof(Cunder_Allocator));
-		::new (allocator) Cunder_Allocator(std::forward<void*(*)(size_t, uint8_t)>(allocate), std::forward<c10::DeleterFnPtr>(deallocate));
+		::new (allocator) Cunder_Allocator(std::forward<void *(*)(size_t, uint8_t)>(allocate), std::forward<c10::DeleterFnPtr>(deallocate));
 		torch::SetAllocator(c10::DeviceType::CPU, allocator);
 		return allocator;
 	}
 
 	void
-	cunder_allocator_free(Cunder_Allocator * allocator)
+	cunder_allocator_free(Cunder_Allocator *allocator)
 	{
 		free(allocator);
 	}
