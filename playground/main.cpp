@@ -63,9 +63,11 @@ main(int argc, char *argv[])
 	cunder_tensor_free(cunder_ones_tensor);
 
 	// Create tensor from data
-	float tensor_data[] = {1, 9, 1};
-	int tensor_data_shape[] = {3};
-	auto cunder_data_tensor = cunder_tensor_from_data_wrap(1, tensor_data_shape, tensor_data, Cunder_DType::Cunder_Float32);
+	float tensor_data[] = {1, 9, 1, 3, 2, 5};
+	int tensor_data_shape[] = {/* batch */ 3, /* channel */ 2};
+	auto data_tensor = torch::from_blob(tensor_data, {3, 2});
+	auto cunder_data_tensor = cunder_tensor_from_data(2, tensor_data_shape, tensor_data, Cunder_DType::Cunder_Float32);
+	pretty_print("Tensor external data: ", data_tensor);
 	printf("Cunder Tensor external data: \n");
 	cunder_tensor_print(cunder_data_tensor);
 
@@ -82,9 +84,53 @@ main(int argc, char *argv[])
 	cunder_tensor_free(cunder_data_tensor_clone);
 
 	// cunder_module
-	Cunder_Module *cunder_module = cunder_module_load("D:\\model.pt");
+	Cunder_Module *cunder_module = cunder_module_load(CUNDER_DATA_DIR "\\model.pt");
 	cunder_module_dump(cunder_module, false, false, false);
+
+	// module forward
+	cunder_module_eval(cunder_module);
+	std::cout << "Module input count: " << cunder_module_input_num(cunder_module) << std::endl;
+
+	size_t output_count;
+	Cunder_Tensor *output_tensors = cunder_module_forward(cunder_module, 1, cunder_data_tensor, output_count);
+	std::cout << "Module output count: " << output_count << std::endl;
+	cunder_tensor_print_attributes(output_tensors);
+
+	cunder_tensor_free(cunder_data_tensor);
 	cunder_module_free(cunder_module);
+
+	float tensor_data_2[] = {1, 9, 0, 3, 2};
+	int tensor_data_shape_2[] = {/* batch */ 5, /* channel */ 1};
+	auto cunder_data_tensor_2 = cunder_tensor_from_data(2, tensor_data_shape_2, tensor_data_2, Cunder_DType::Cunder_Float32);
+	printf("Cunder Tensor external data: \n");
+	cunder_tensor_print(cunder_data_tensor_2);
+
+	float tensor_data_3[] = {0, 3, 2, 1};
+	int tensor_data_shape_3[] = {/* batch */ 4, /* channel */ 1};
+	auto cunder_data_tensor_3 = cunder_tensor_from_data(2, tensor_data_shape_3, tensor_data_3, Cunder_DType::Cunder_Float32);
+	printf("Cunder Tensor external data: \n");
+	cunder_tensor_print(cunder_data_tensor_3);
+
+	// cunder_module 2 input 3 output
+	Cunder_Module *cunder_module_2_3 = cunder_module_load(CUNDER_DATA_DIR "\\model_2_input_3_output.pt");
+	cunder_module_dump(cunder_module_2_3, false, false, false);
+
+	// module forward
+	cunder_module_eval(cunder_module_2_3);
+	std::cout << "Module input count: " << cunder_module_input_num(cunder_module_2_3) << std::endl;
+
+	size_t output_count_2_3;
+	Cunder_Tensor * model_2_3_inputs = cunder_tensor_allocate(2);
+	cunder_tensor_array_set(model_2_3_inputs, 0, cunder_data_tensor_2);
+	cunder_tensor_array_set(model_2_3_inputs, 1, cunder_data_tensor_3);
+	Cunder_Tensor *output_tensors_2_3 = cunder_module_forward(cunder_module_2_3, 2, model_2_3_inputs, output_count_2_3);
+	std::cout << "Module output count: " << output_count_2_3 << std::endl;
+	cunder_tensor_print_attributes(output_tensors_2_3);
+
+	cunder_tensor_free(model_2_3_inputs);
+	cunder_tensor_free(cunder_data_tensor_2);
+	cunder_tensor_free(cunder_data_tensor_3);
+	cunder_module_free(cunder_module_2_3);
 
 	cunder_allocator_free(allocator);
 	return 0;
