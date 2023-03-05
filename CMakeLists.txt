@@ -40,7 +40,7 @@ if(CUNDER_BUILD_TESTS)
     # EXCLUDE_FROM_ALL TRUE
     # )
 
-    set(CUNDER_DATA_DIR "${PROJECT_SOURCE_DIR}/cunder-data")
+    set(CUNDER_DATA_DIR "${CMAKE_SOURCE_DIR}/cunder-data")
     add_subdirectory(playground)
     # add_subdirectory(unittests)
 endif()
