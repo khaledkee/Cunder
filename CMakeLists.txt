@@ -30,17 +30,18 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 add_subdirectory(Cunder)
 
 if(CUNDER_BUILD_TESTS)
-    # include(CPM)
-    # doctest
-    # CPMDeclarePackage(doctest
-    # NAME doctest
-    # GIT_TAG 2.4.6
-    # GIT_REPOSITORY https://github.com/onqtam/doctest.git
-    # GIT_SHALLOW TRUE
-    # EXCLUDE_FROM_ALL TRUE
-    # )
+    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+    include(CPM)
+    CPMDeclarePackage(doctest
+        NAME doctest
+        GIT_TAG 2.4.6
+        GIT_REPOSITORY https://github.com/onqtam/doctest.git
+        GIT_SHALLOW TRUE
+        EXCLUDE_FROM_ALL TRUE
+    )
+    CPMGetPackage(doctest)
 
     set(CUNDER_DATA_DIR "${CMAKE_SOURCE_DIR}/cunder-data")
     add_subdirectory(playground)
-    # add_subdirectory(unittests)
+    add_subdirectory(unittests)
 endif()
