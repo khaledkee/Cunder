@@ -57,11 +57,11 @@ NOTE: add LibTorch dlls and include files in external folder OR use CMake find(t
     - [x] float32
     - [x] float64
   - [x] access tensor data
-- [ ] Torch script jit model
+- [x] Torch script jit model
   - [x] Module struct `torch::jit::Module`
   - [x] load Module `torch::jit::load()`
-  - [ ] call `eval()` on Module
-  - [ ] run Module on cpu (call `forward()` with tensors)
+  - [x] call `eval()` on Module
+  - [x] run Module on cpu (call `forward()` with tensors)
 - [ ] Add support to external libraries:
   - [ ] torch_sparse
   - [ ] torch_scatter
