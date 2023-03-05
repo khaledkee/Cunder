@@ -84,13 +84,13 @@ main(int argc, char *argv[])
 
 	float tensor_data_2[] = {1, 9, 0, 3, 2};
 	int tensor_data_shape_2[] = {/* batch */ 5, /* channel */ 1};
-	auto cunder_data_tensor_2 = cunder_tensor_from_data_wrap(2, tensor_data_shape_2, tensor_data_2, Cunder_DType::Cunder_Float32);
+	auto cunder_data_tensor_2 = cunder_tensor_from_data(2, tensor_data_shape_2, tensor_data_2, Cunder_DType::Cunder_Float32);
 	printf("Cunder Tensor external data: \n");
 	cunder_tensor_print(cunder_data_tensor_2);
 
 	float tensor_data_3[] = {0, 3, 2, 1};
 	int tensor_data_shape_3[] = {/* batch */ 4, /* channel */ 1};
-	auto cunder_data_tensor_3 = cunder_tensor_from_data_wrap(2, tensor_data_shape_3, tensor_data_3, Cunder_DType::Cunder_Float32);
+	auto cunder_data_tensor_3 = cunder_tensor_from_data(2, tensor_data_shape_3, tensor_data_3, Cunder_DType::Cunder_Float32);
 	printf("Cunder Tensor external data: \n");
 	cunder_tensor_print(cunder_data_tensor_3);
 

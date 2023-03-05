@@ -325,7 +325,7 @@ extern "C"
 
 	void
 	cunder_tensor_from_data_allocated(
-		Cunder_Tensor *tensor, int ndim, const int *shape, void *data, Cunder_DType dtype, void (*free)(void *))
+		Cunder_Tensor *tensor, int ndim, const int *shape, void *data, Cunder_DType dtype)
 	{
 		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
 			return;
@@ -334,7 +334,7 @@ extern "C"
 
 		if (tensor->tensor.getIntrusivePtr() == nullptr)
 			tensor->tensor.unsafeReleaseTensorImpl();
-		tensor->tensor = torch::from_blob(data, vshape, free, torch::TensorOptions(cunder::get_libtorch_dtype(dtype)));
+		tensor->tensor = torch::from_blob(data, vshape, torch::TensorOptions(cunder::get_libtorch_dtype(dtype)));
 	}
 
 	void
