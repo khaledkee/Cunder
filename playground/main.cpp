@@ -55,7 +55,7 @@ main(int argc, char *argv[])
 	float tensor_data[] = {1, 9, 1};
 	int tensor_data_shape[] = {3};
 	auto data_tensor = torch::from_blob(tensor_data, {3});
-	auto cunder_data_tensor = cunder_tensor_from_data_wrap(1, tensor_data_shape, tensor_data, Cunder_DType::Cunder_Float32);
+	auto cunder_data_tensor = cunder_tensor_from_data(1, tensor_data_shape, tensor_data, Cunder_DType::Cunder_Float32);
 	pretty_print("Tensor external data: ", data_tensor);
 	printf("Cunder Tensor external data: \n");
 	cunder_tensor_print(cunder_data_tensor);
@@ -106,7 +106,7 @@ main(int argc, char *argv[])
 	Cunder_Tensor *allocated_cunder_data_tensor = (Cunder_Tensor*)_aligned_malloc(size, alignment);
 	memset(allocated_cunder_data_tensor, 0, size);
 	cunder_tensor_from_data_allocated(
-		allocated_cunder_data_tensor, 1, tensor_data_shape, tensor_data, Cunder_DType::Cunder_Float32, nullptr);
+		allocated_cunder_data_tensor, 1, tensor_data_shape, tensor_data, Cunder_DType::Cunder_Float32);
 	cunder_tensor_print_attributes(allocated_cunder_data_tensor);
 	cunder_tensor_print(allocated_cunder_data_tensor);
 
