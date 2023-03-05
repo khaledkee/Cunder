@@ -59,14 +59,15 @@ extern "C"
 
 	typedef struct Cunder_Tensor Cunder_Tensor;
 	typedef struct Cunder_Module Cunder_Module;
+	typedef struct Cunder_Allocator Cunder_Allocator;
 
 	// API
 
-	CUNDER_EXPORT void
-	cunder_get_tensor_size_alignment(int64_t &size, int64_t &alignment);
+	CUNDER_EXPORT Cunder_Allocator *
+	cunder_set_cpu_allocator(void *(*allocate)(size_t, uint8_t), void (*deallocate)(void *));
 
 	CUNDER_EXPORT void
-	cunder_get_module_size_alignment(int64_t &size, int64_t &alignment);
+	cunder_allocator_free(Cunder_Allocator *allocator);
 
 	CUNDER_EXPORT Torch_Version
 	cunder_torch_version();
@@ -75,13 +76,10 @@ extern "C"
 	cunder_tensor_allocate(size_t tensors_count);
 
 	CUNDER_EXPORT void
-	cunder_tensor_array_set(Cunder_Tensor * tensors_array, size_t i, Cunder_Tensor * tensor);
+	cunder_tensor_array_set(Cunder_Tensor *tensors_array, size_t i, Cunder_Tensor *tensor);
 
 	CUNDER_EXPORT Cunder_Tensor *
 	cunder_tensor_clone(Cunder_Tensor *src);
-
-	CUNDER_EXPORT void
-	cunder_tensor_clone_allocated(void *out_void, void *src_void);
 
 	// Delete objects.
 	CUNDER_EXPORT int
@@ -103,25 +101,10 @@ extern "C"
 	CUNDER_EXPORT Cunder_Tensor *
 	cunder_tensor_range(int start, int end, int step, Cunder_DType dtype);
 
-	CUNDER_EXPORT void
-	cunder_tensor_ones_allocated(Cunder_Tensor *tensor, int ndim, const int *shape, Cunder_DType dtype);
-
-	CUNDER_EXPORT void
-	cunder_tensor_zeros_allocated(Cunder_Tensor *tensor, int ndim, const int *shape, Cunder_DType dtype);
-
-	CUNDER_EXPORT void
-	cunder_tensor_eye_allocated(Cunder_Tensor *tensor, int n, Cunder_DType dtype);
-
-	CUNDER_EXPORT void
-	cunder_tensor_range_allocated(Cunder_Tensor *tensor, int start, int end, int step, Cunder_DType dtype);
-
 	// Initialize tensor with data
 
 	CUNDER_EXPORT Cunder_Tensor *
 	cunder_tensor_from_data(int ndim, const int *shape, void *data, Cunder_DType dtype);
-
-	CUNDER_EXPORT void
-	cunder_tensor_from_data_allocated(Cunder_Tensor *tensor, int ndim, const int *shape, void *data, Cunder_DType dtype);
 
 	// Tensor to()
 
@@ -168,8 +151,6 @@ extern "C"
 	// torch jit module load
 	CUNDER_EXPORT Cunder_Module *
 	cunder_module_load(const char *filename);
-	CUNDER_EXPORT void
-	cunder_module_load_allocated(const char *filename, void *module_void);
 
 	CUNDER_EXPORT void
 	cunder_module_eval(Cunder_Module *cunder_module);
