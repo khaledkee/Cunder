@@ -112,16 +112,10 @@ extern "C"
 	// Initialize tensor with data
 
 	CUNDER_EXPORT Cunder_Tensor *
-	cunder_tensor_from_data_wrap(int ndim, const int *shape, void *data, Cunder_DType dtype);
-
-	CUNDER_EXPORT Cunder_Tensor *
-	cunder_tensor_from_data(int ndim, const int *shape, void *data, Cunder_DType dtype, void (*free)(void *));
+	cunder_tensor_from_data(int ndim, const int *shape, void *data, Cunder_DType dtype);
 
 	CUNDER_EXPORT void
-	cunder_tensor_from_data_wrap_allocated(Cunder_Tensor *tensor, int ndim, const int *shape, void *data, Cunder_DType dtype);
-
-	CUNDER_EXPORT void
-	cunder_tensor_from_data_allocated(Cunder_Tensor *tensor, int ndim, const int *shape, void *data, Cunder_DType dtype, void (*free)(void *));
+	cunder_tensor_from_data_allocated(Cunder_Tensor *tensor, int ndim, const int *shape, void *data, Cunder_DType dtype);
 
 	// Tensor to()
 
