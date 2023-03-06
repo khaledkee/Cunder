@@ -1,0 +1,41 @@
+name: Unittests
+  
+on:
+  push:
+    branches: [ main ]  
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+  
+concurrency:
+  group: Test-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+  
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+  
+    steps:
+    - uses: actions/checkout@v3
+  
+    - uses: seanmiddleditch/gha-setup-ninja@master
+  
+    - name: Cache CPM Dependencies
+      uses: actions/cache@v3.2.6
+      with:
+        path: ~/CPMCache
+        key: ${{ runner.os }}-CPMCache
+  
+    - name: Configure Release
+      run: cmake . -B -G Ninja ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DCPM_SOURCE_CACHE=~/CPMCache
+  
+    - name: Build Release
+      run: cmake --build ${{github.workspace}}/build --config Release
+  
+    - name: Unittests Release
+      run: ${{github.workspace}}/build/bin/Release/test-cunder

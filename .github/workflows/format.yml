@@ -1,0 +1,17 @@
+name: clang-format lint
+  
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+  
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+  
+      - name: check formatting
+        run: ./lint-clang-format.sh
