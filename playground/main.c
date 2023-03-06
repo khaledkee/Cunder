@@ -18,6 +18,8 @@ my_alloc(size_t size, uint8_t alignment)
 void
 my_free(void *data)
 {
+	if (data == NULL)
+		return;
 	printf("freeing %p\n", data);
 	_aligned_free(data);
 }
@@ -60,13 +62,13 @@ main(int argc, char *argv[])
 	float tensor_data[] = {1, 9, 1, 3, 2, 5};
 	int tensor_data_shape[] = {/* batch */ 3, /* channel */ 2};
 	Cunder_Tensor *cunder_data_tensor = cunder_tensor_from_data(2, tensor_data_shape, tensor_data, Cunder_Float32);
-	printf("Cunder Tensor external data: \n");
+	printf("Cunder Tensor 1 external data: \n");
 	cunder_tensor_print(cunder_data_tensor);
 
 	// access tensor data
 	const float *tensor_accessor = cunder_tensor_accessor_f32(cunder_data_tensor);
-	for (size_t i = 0; i < 3; i++)
-		printf("%.3f,", tensor_accessor[i]);
+	for (size_t i = 0; i < 6; i++)
+		printf("%.1f,", tensor_accessor[i]);
 	printf("\n");
 
 	// clone tensor
@@ -94,13 +96,13 @@ main(int argc, char *argv[])
 	float tensor_data_2[] = {1, 9, 0, 3, 2};
 	int tensor_data_shape_2[] = {/* batch */ 5, /* channel */ 1};
 	Cunder_Tensor *cunder_data_tensor_2 = cunder_tensor_from_data(2, tensor_data_shape_2, tensor_data_2, Cunder_Float32);
-	printf("Cunder Tensor external data: \n");
+	printf("Cunder Tensor 2 external data: \n");
 	cunder_tensor_print(cunder_data_tensor_2);
 
 	float tensor_data_3[] = {0, 3, 2, 1};
 	int tensor_data_shape_3[] = {/* batch */ 4, /* channel */ 1};
 	Cunder_Tensor *cunder_data_tensor_3 = cunder_tensor_from_data(2, tensor_data_shape_3, tensor_data_3, Cunder_Float32);
-	printf("Cunder Tensor external data: \n");
+	printf("Cunder Tensor 3 external data: \n");
 	cunder_tensor_print(cunder_data_tensor_3);
 
 	// cunder_module 2 input 3 output
