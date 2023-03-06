@@ -34,8 +34,14 @@ main(int argc, char **argv)
 	auto allocator = cunder_set_cpu_allocator(my_alloc, my_free);
 
 	doctest::Context context;
+	context.applyCommandLine(argc, argv);
 	int res = context.run();
+	if (context.shouldExit())
+	{ // important - query flags (and --exit) rely on the user doing this
+		goto cleanup_and_exit;
+	}
 
+cleanup_and_exit:
 	// tearDown cpu allocator
 	cunder_allocator_free(allocator);
 
