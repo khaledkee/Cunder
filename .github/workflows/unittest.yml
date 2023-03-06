@@ -32,10 +32,10 @@ jobs:
         key: ${{ runner.os }}-CPMCache
   
     - name: Configure Release
-      run: cmake . -B -G Ninja ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DCPM_SOURCE_CACHE=~/CPMCache
+      run: cmake . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCPM_SOURCE_CACHE=~/CPMCache
   
     - name: Build Release
-      run: cmake --build ${{github.workspace}}/build --config Release
+      run: cmake --build build --config Release
   
     - name: Unittests Release
-      run: ${{github.workspace}}/build/bin/Release/test-cunder
+      run: build/bin/Release/test-cunder
