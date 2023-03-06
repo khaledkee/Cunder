@@ -299,8 +299,8 @@ extern "C"
 	{
 		if (_cunder_check_initialization_param(ndim, shape, dtype) == false)
 			return nullptr;
-		Cunder_Tensor *tensor = new Cunder_Tensor{};
 
+		Cunder_Tensor *tensor = new Cunder_Tensor{};
 		std::vector<int64_t> vshape(shape, shape + ndim);
 		tensor->tensor = torch::from_blob(data, vshape, torch::TensorOptions(cunder::get_libtorch_dtype(dtype)));
 		return tensor;
@@ -311,7 +311,6 @@ extern "C"
 	{
 		if (tensor == nullptr)
 			return;
-
 		tensor->tensor = tensor->tensor.toType(cunder::get_libtorch_dtype(dtype));
 	}
 

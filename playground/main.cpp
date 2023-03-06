@@ -127,6 +127,7 @@ main(int argc, char *argv[])
 	cunder_tensor_free(model_2_3_inputs);
 	cunder_tensor_free(cunder_data_tensor_2);
 	cunder_tensor_free(cunder_data_tensor_3);
+	cunder_tensor_free(output_tensors_2_3);
 	cunder_module_free(cunder_module_2_3);
 
 	cunder_allocator_free(allocator);
