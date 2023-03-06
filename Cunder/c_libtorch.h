@@ -98,6 +98,8 @@ extern "C"
 	// cunder array operations
 	CUNDER_EXPORT void
 	cunder_tensor_array_set(Cunder_Array tensors_array, size_t i, Cunder_Tensor *tensor);
+	CUNDER_EXPORT Cunder_Tensor *
+	cunder_tensor_array_get(Cunder_Array tensors_array, size_t i);
 
 	// Initialize tensor without data
 	CUNDER_EXPORT Cunder_Tensor *

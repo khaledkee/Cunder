@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <doctest/doctest.h>
 #include "c_libtorch.h"
 
@@ -115,8 +114,7 @@ TEST_CASE("[Module] forward")
 	cunder_module_eval(cunder_module);
 	CHECK(cunder_module_input_num(cunder_module) == 2);
 
-	size_t output_count;
-	Cunder_Tensor *model_inputs = cunder_tensor_allocate(2);
+	Cunder_Array model_inputs = cunder_tensor_allocate(2);
 
 	float tensor_data_2[] = {1, 9, 0, 3, 2};
 	int tensor_data_shape_2[] = {/* batch */ 5, /* channel */ 1};
@@ -127,14 +125,15 @@ TEST_CASE("[Module] forward")
 	cunder_tensor_array_set(model_inputs, 0, cunder_data_tensor_2);
 	cunder_tensor_array_set(model_inputs, 1, cunder_data_tensor_3);
 
-	Cunder_Tensor *output_tensors = cunder_module_forward(cunder_module, 2, model_inputs, output_count);
-	CHECK(output_count == 3);
-	for (size_t i = 0; i < output_count; ++i)
-		CHECK(cunder_tensor_numel(output_tensors) == 15);
+	Cunder_Array output_tensors = cunder_module_forward(cunder_module, model_inputs);
+	CHECK(output_tensors.length == 3);
+	CHECK(cunder_tensor_numel(cunder_tensor_array_get(output_tensors, 0)) == 15);
+	CHECK(cunder_tensor_numel(cunder_tensor_array_get(output_tensors, 1)) == 12);
+	CHECK(cunder_tensor_numel(cunder_tensor_array_get(output_tensors, 2)) == 30);
 
-	cunder_tensor_free(model_inputs);
+	cunder_array_free(model_inputs);
 	cunder_tensor_free(cunder_data_tensor_2);
 	cunder_tensor_free(cunder_data_tensor_3);
-	cunder_tensor_free(output_tensors);
+	cunder_array_free(output_tensors);
 	cunder_module_free(cunder_module);
 }

@@ -198,6 +198,14 @@ extern "C"
 	}
 
 	Cunder_Tensor *
+	cunder_tensor_array_get(Cunder_Array tensors_array, size_t i)
+	{
+		if (i > tensors_array.length)
+			return nullptr;
+		return &tensors_array.data[i];
+	}
+
+	Cunder_Tensor *
 	cunder_tensor_clone(Cunder_Tensor *src)
 	{
 		if (src == nullptr)
