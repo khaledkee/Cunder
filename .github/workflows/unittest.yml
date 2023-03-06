@@ -23,7 +23,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
   
-    - uses: seanmiddleditch/gha-setup-ninja@master
+    - name: Setup Cpp Ninja
+      uses: aminya/setup-cpp@v1
+      with:
+        compiler: ${{ matrix.compiler }}
+        cmake: true
+        ninja: true
   
     - name: Cache CPM Dependencies
       uses: actions/cache@v3.2.6
