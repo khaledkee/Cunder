@@ -90,6 +90,7 @@ main(int argc, char *argv[])
 	printf("Module output count: %lld\n", output_tensors.length);
 	cunder_tensor_print_attributes(output_tensors.data);
 
+	cunder_array_free(output_tensors);
 	cunder_tensor_free(cunder_data_tensor);
 	cunder_module_free(cunder_module);
 
