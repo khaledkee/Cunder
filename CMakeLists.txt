@@ -32,11 +32,10 @@ add_subdirectory(Cunder)
 if(CUNDER_BUILD_TESTS)
     include(FetchContent)
     FetchContent_Declare(
-    doctest
-    GIT_REPOSITORY https://github.com/onqtam/doctest.git
-    GIT_TAG        2.4.6 # 2.4.6
-    GIT_SHALLOW    TRUE
-    EXCLUDE_FROM_ALL TRUE
+        doctest
+        GIT_REPOSITORY https://github.com/onqtam/doctest.git
+        GIT_TAG        2.4.6 # 2.4.6
+        GIT_SHALLOW    TRUE
     )
     FetchContent_MakeAvailable(doctest)
 

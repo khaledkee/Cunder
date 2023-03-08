@@ -61,8 +61,15 @@ extern "C"
 	typedef struct Cunder_Module Cunder_Module;
 	typedef struct Cunder_Allocator Cunder_Allocator;
 
+	typedef struct
+	{
+		Cunder_Tensor *data;
+		size_t length;
+	} Cunder_Array;
+
 	// API
 
+	// cunder allocator
 	CUNDER_EXPORT Cunder_Allocator *
 	cunder_set_cpu_allocator(void *(*allocate)(size_t, uint8_t), void (*deallocate)(void *));
 
@@ -72,11 +79,8 @@ extern "C"
 	CUNDER_EXPORT Torch_Version
 	cunder_torch_version();
 
-	CUNDER_EXPORT Cunder_Tensor *
+	CUNDER_EXPORT Cunder_Array
 	cunder_tensor_allocate(size_t tensors_count);
-
-	CUNDER_EXPORT void
-	cunder_tensor_array_set(Cunder_Tensor *tensors_array, size_t i, Cunder_Tensor *tensor);
 
 	CUNDER_EXPORT Cunder_Tensor *
 	cunder_tensor_clone(Cunder_Tensor *src);
@@ -87,6 +91,15 @@ extern "C"
 
 	CUNDER_EXPORT int
 	cunder_module_free(Cunder_Module *self);
+
+	CUNDER_EXPORT int
+	cunder_array_free(Cunder_Array self);
+
+	// cunder array operations
+	CUNDER_EXPORT void
+	cunder_tensor_array_set(Cunder_Array tensors_array, size_t i, Cunder_Tensor *tensor);
+	CUNDER_EXPORT Cunder_Tensor *
+	cunder_tensor_array_get(Cunder_Array tensors_array, size_t i);
 
 	// Initialize tensor without data
 	CUNDER_EXPORT Cunder_Tensor *
@@ -162,8 +175,8 @@ extern "C"
 	CUNDER_EXPORT size_t
 	cunder_module_input_num(Cunder_Module *cunder_module);
 
-	CUNDER_EXPORT Cunder_Tensor *
-	cunder_module_forward(Cunder_Module *cunder_module, size_t tensors_array_num, Cunder_Tensor *tensors_array, size_t &output_count);
+	CUNDER_EXPORT Cunder_Array
+	cunder_module_forward(Cunder_Module *cunder_module, Cunder_Array tensors_array);
 
 	CUNDER_EXPORT void
 	cunder_tensor_print_attributes(Cunder_Tensor *tensor);
