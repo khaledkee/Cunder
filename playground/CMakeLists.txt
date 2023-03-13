@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 set(PLAYGROUND_TARGET_NAME playground)
 
-add_executable(${PLAYGROUND_TARGET_NAME} main.cpp)
+add_executable(${PLAYGROUND_TARGET_NAME} main.c)
 target_link_libraries(${PLAYGROUND_TARGET_NAME} PRIVATE cunder)
 target_include_directories(${PLAYGROUND_TARGET_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/Cunder)
 
