@@ -32,19 +32,26 @@ include(FetchContent)
 # https://github.com/Maverobot/libtorch_examples/blob/master/CMakeLists.txt
 find_package(Torch CONFIG)
 if(NOT Torch_FOUND)
-  message(STATUS "libtorch not found")
-  message(STATUS "fetching libtorch cpu-1.13.1")
-FetchContent_Declare(
-    libtorch
-    URL https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-1.13.1%2Bcpu.zip
-    SOURCE_DIR libtorch)
-  FetchContent_GetProperties(libtorch)
-  if(NOT libtorch_POPULATED)
-    unset(FETCHCONTENT_QUIET CACHE)
-    FetchContent_Populate(libtorch)
-    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR}/libtorch)
-  endif()
-  find_package(Torch REQUIRED PATHS "${CMAKE_BINARY_DIR}/libtorch" NO_DEFAULT_PATH CONFIG)
+    message(STATUS "libtorch not found")
+    message(STATUS "fetching libtorch cpu-1.13.1")
+    if (WIN32)
+        FetchContent_Declare(
+            libtorch
+            URL https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-1.13.1%2Bcpu.zip
+            SOURCE_DIR libtorch)
+    elseif (UNIX)
+    FetchContent_Declare(
+        libtorch
+        URL https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-1.13.1%2Bcpu.zip
+        SOURCE_DIR libtorch)
+    endif ()
+        FetchContent_GetProperties(libtorch)
+    if(NOT libtorch_POPULATED)
+        unset(FETCHCONTENT_QUIET CACHE)
+        FetchContent_Populate(libtorch)
+        list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR}/libtorch)
+    endif()
+    find_package(Torch REQUIRED PATHS "${CMAKE_BINARY_DIR}/libtorch" NO_DEFAULT_PATH CONFIG)
 endif()
 
 # call find_package again with REQUIRED to make sure it's found either locally or using CPM
