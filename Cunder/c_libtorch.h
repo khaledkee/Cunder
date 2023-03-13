@@ -4,6 +4,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#if defined(_WIN32)
+#else
+#include <string.h>
+#define _aligned_malloc(size, alignment) aligned_alloc(alignment, size)
+#define _aligned_free(ptr) free(ptr)
+#endif
+
 #ifdef __cplusplus
 extern "C"
 {

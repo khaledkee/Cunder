@@ -108,7 +108,7 @@ TEST_CASE("[Tensor] clone")
 TEST_CASE("[Module] forward")
 {
 
-	Cunder_Module *cunder_module = cunder_module_load(CUNDER_DATA_DIR "\\model_2_input_3_output.pt");
+	Cunder_Module *cunder_module = cunder_module_load(CUNDER_TEST_DATA_DIR "/model_2_input_3_output.pt");
 
 	// module forward
 	cunder_module_eval(cunder_module);
