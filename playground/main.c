@@ -1,6 +1,5 @@
 #include "c_libtorch.h"
 
-#include <corecrt_malloc.h>
 #include <stdio.h>
 #include <string.h>
 

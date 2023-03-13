@@ -19,12 +19,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # TODO: don't use absolute path
-# IF(CMAKE_BUILD_TYPE MATCHES "Debug")
-#     set(LIBTORCH_PATH "D:/Libtorch/Original/libtorch-win-shared-with-deps-debug-1.13.1+cpu/libtorch")
-# ELSE()
-#     set(LIBTORCH_PATH "D:/Libtorch/Original/libtorch-win-shared-with-deps-1.13.1+cpu/libtorch")
-# ENDIF()
-# find_package(Torch REQUIRED PATHS "${LIBTORCH_PATH}" NO_DEFAULT_PATH CONFIG)
+IF(CMAKE_BUILD_TYPE MATCHES "Debug")
+    set(LIBTORCH_PATH "D:/Libtorch/Original/libtorch-win-shared-with-deps-debug-1.13.1+cpu/libtorch")
+ELSE()
+    set(LIBTORCH_PATH "D:/Libtorch/Original/libtorch-win-shared-with-deps-1.13.1+cpu/libtorch")
+ENDIF()
+find_package(Torch REQUIRED PATHS "${LIBTORCH_PATH}" NO_DEFAULT_PATH CONFIG)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 include(FetchContent)
@@ -44,7 +44,7 @@ FetchContent_Declare(
     FetchContent_Populate(libtorch)
     list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR}/libtorch)
   endif()
-  find_package(Torch REQUIRED CONFIG)
+  find_package(Torch REQUIRED PATHS "${CMAKE_BINARY_DIR}/libtorch" NO_DEFAULT_PATH CONFIG)
 endif()
 
 set(CUNDER_DATA_DIR "${CMAKE_SOURCE_DIR}/cunder-data")
