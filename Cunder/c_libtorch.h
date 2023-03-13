@@ -5,7 +5,6 @@
 #include <stdbool.h>
 
 #if defined(_WIN32)
-#include <corecrt_malloc.h>
 #else
 #include <string.h>
 #define _aligned_malloc(size, alignment) aligned_alloc(alignment, size)
