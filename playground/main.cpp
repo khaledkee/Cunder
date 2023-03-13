@@ -81,7 +81,7 @@ main(int argc, char *argv[])
 	cunder_tensor_free(cunder_data_tensor_clone);
 
 	// cunder_module
-	Cunder_Module *cunder_module = cunder_module_load(CUNDER_DATA_DIR "\\model.pt");
+	Cunder_Module *cunder_module = cunder_module_load(CUNDER_DATA_DIR "/model.pt");
 	cunder_module_dump(cunder_module, false, false, false);
 
 	// module forward
@@ -109,7 +109,7 @@ main(int argc, char *argv[])
 	cunder_tensor_print(cunder_data_tensor_3);
 
 	// cunder_module 2 input 3 output
-	Cunder_Module *cunder_module_2_3 = cunder_module_load(CUNDER_DATA_DIR "\\model_2_input_3_output.pt");
+	Cunder_Module *cunder_module_2_3 = cunder_module_load(CUNDER_DATA_DIR "/model_2_input_3_output.pt");
 	cunder_module_dump(cunder_module_2_3, false, false, false);
 
 	// module forward
