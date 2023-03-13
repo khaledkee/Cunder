@@ -24,7 +24,7 @@ IF(CMAKE_BUILD_TYPE MATCHES "Debug")
 ELSE()
     set(LIBTORCH_PATH "D:/Libtorch/Original/libtorch-win-shared-with-deps-1.13.1+cpu/libtorch")
 ENDIF()
-find_package(Torch REQUIRED PATHS "${LIBTORCH_PATH}" NO_DEFAULT_PATH CONFIG)
+find_package(Torch PATHS "${LIBTORCH_PATH}" NO_DEFAULT_PATH CONFIG)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 include(FetchContent)
@@ -46,6 +46,9 @@ FetchContent_Declare(
   endif()
   find_package(Torch REQUIRED PATHS "${CMAKE_BINARY_DIR}/libtorch" NO_DEFAULT_PATH CONFIG)
 endif()
+
+# call find_package again with REQUIRED to make sure it's found either locally or using CPM
+find_package(Torch REQUIRED)
 
 set(CUNDER_DATA_DIR "${CMAKE_SOURCE_DIR}/cunder-data")
 add_subdirectory(Cunder)
